@@ -1,8 +1,10 @@
 from flask import Flask, render_template,request
+import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/loreal_db.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = os.urandom(24)
 
 def __init__(self,name,price,last_scraped):
     self.name = name
