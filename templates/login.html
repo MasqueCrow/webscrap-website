@@ -22,8 +22,8 @@
         {% endif %}
         {% endwith %}
         <form method="POST" class="form-signin" action="/login">
-            <input type="email" class="form-control" name="email" aria-describedby="emailHelp" placeholder="Your Email">
-            <input type="password" class="form-control" name='password' placeholder="Your Password">
+            <input type="email" class="form-control" name="email" aria-describedby="emailHelp" placeholder="Your Email" required>
+            <input type="password" class="form-control" name='password' placeholder="Your Password" required>
             <div class="checkbox rememberme">
             <input type="checkbox" class="form-check-input" name='remember' value='remember' checked>
             <label class="form-check-label" > Remember me</label>

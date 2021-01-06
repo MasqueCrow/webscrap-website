@@ -33,7 +33,8 @@ def login_post():
     email = request.form.get('email')
     password = request.form.get('password')
     remember = True if request.form.get('remember') else False
-
+    print(email,password)
+    
     user = User.query.filter_by(email=email).first()
 
     #check if user actually exists
