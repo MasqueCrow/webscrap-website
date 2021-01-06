@@ -1,28 +1,38 @@
-{% extends 'base.html' %}
-{% block content%}
-<div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-    <h3 class="title">Login</h3>
-    <div class="box">
-        <form method="POST" action="/login">
-            <div class="field">
-                <div class="control">
-                    <input class="input is-large" type="email" name="email" placeholder="Your Email" autofocus="">
-                </div>
-            </div>
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="../static/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/login.css" rel="stylesheet">
+    <script src="../static/bootstrap.bundle.min.js"></script>
+  </head>
 
-            <div class="field">
-                <div class="control">
-                    <input class="input is-large" type="password" name="password" placeholder="Your Password">
-                </div>
+  <body class="container-fluid">
+    <div class="row vertical-offset">
+      <div class="col-sm-4 col-md-4 col-lg-4 col-xl-4 offset-sm-4 offset-md-4 offset-lg-4 offset-xl-4">
+
+        <img src="static/img/Loreal-Logo.jpg"/ class="loreal-logo">
+        <h2 class="title">Please Login</h2>
+        <!--Flash message -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="alert alert-danger" role="alert">
+          {{ messages[0] }}
+        </div>
+        {% endif %}
+        {% endwith %}
+        <form method="POST" class="form-signin" action="/login">
+            <input type="email" class="form-control" name="email" aria-describedby="emailHelp" placeholder="Your Email">
+            <input type="password" class="form-control" name='password' placeholder="Your Password">
+            <div class="checkbox rememberme">
+            <input type="checkbox" class="form-check-input" name='remember' value='remember' checked>
+            <label class="form-check-label" > Remember me</label>
             </div>
-            <div class="field">
-                <label class="checkbox">
-                    <input type="checkbox">
-                    Remember me
-                </label>
-            </div>
-            <button class="button is-block is-info is-large is-fullwidth">Login</button>
+          <button type="submit" class="btn btn-primary login">Login</button>
         </form>
+        <div class="text-center" style="margin-top:3%;"> <a style="text-decoration: none;" href="{{ url_for('auth.signup') }}">Register an account</a></div>
+        </div>
     </div>
-</div>
-{% endblock %}
+
+  </body>
+</html>

@@ -1,34 +1,34 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <link href="../static/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/signup.css">
+  </head>
+  <body>
+    <div class="signup-form">
+        <form class="needs-validation" method="POST" action="/signup">
+    		<h2>Register</h2>
+    		<p class="hint-text">Create your account. It's free and only takes a minute.</p>
+            <div class="form-group">
+    				      <div class="col-xs-6"><input type="text" class="form-control" name="name" placeholder="Your Name" required></div>
+            </div>
 
-{% block content %}
-<div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-    <h3 class="title">Sign Up</h3>
-    <!--Flash message -->
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <div class="alert alert-warning" role="alert">
-          {{ messages[0] }}. Go to <a href="{{ url_for('auth.login')}}">login page</a>.
-      </div>
-    {% endif %}
-    {% endwith %}
-      <form method="POST" action="/signup">
-        <div class="form-group">
-          <label for="name">Name</label>
-          <input type="name" class="form-control" name="name" placeholder="Your Name">
+            <div class="form-group">
+            	    <input type="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" class="form-control" name="email" aria-describedby="emailHelp" placeholder="Enter email" required >
+            </div>
+    		<div class="form-group">
+              <input type="password" id="inputPassword" class="form-control" name='name' placeholder="Password" data-minlength="6" pattern="^\S{6,}$" onchange="this.setCustomValidity(this.validity.patternMismatch ? 'Must have at least 6 characters' : ''); if(this.checkValidity()) form.password_two.pattern = this.value;" required>
         </div>
-        <div class="form-group">
-          <label for="exampleInputEmail1">Email address</label>
-          <input type="email" class="form-control" name="email" aria-describedby="emailHelp" placeholder="Enter email">
-          <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
-        </div>
-        <div class="form-group">
-          <label for="exampleInputPassword1">Password</label>
-          <input type="password" class="form-control" name='name' placeholder="Password">
+    		<div class="form-group">
+                <input type="password" id="inputPasswordConfirm" class="form-control" name="confirm_password" pattern="^\S{6,}$" onchange="this.setCustomValidity(this.validity.patternMismatch ? 'Password do not match' : '');" placeholder="Confirm Password" required>
         </div>
 
-        <button type="submit" class="btn btn-primary">Sign Up</button>
-      </form>
-</div>
-
-
-{% endblock %}
+    		<div class="form-group">
+             <button type="submit" class="btn btn-primary btn-lg btn-block">Sign Up</button>
+        </div>
+        </form>
+    	<div class="text-center">Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a></div>
+    </div>
+  </body>
+</html>

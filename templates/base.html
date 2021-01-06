@@ -12,9 +12,10 @@
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <ul class="navbar-nav px-3">
-        <li class="nav-item text-nowrap">
-          <a class="nav-link" href="#">Sign out</a>
+      <ul  class="navbar-nav px-3 d-flex flex-row">
+        <li class="p-2 navtext">Welcome, {{name}}</li>
+        <li class="p-2 navtext">
+          <a style="text-decoration:none;" href="{{ url_for('auth.login') }}">Sign out</a>
         </li>
       </ul>
     </nav>
