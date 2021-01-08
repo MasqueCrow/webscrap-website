@@ -38,4 +38,4 @@ from flask_login import login_required, current_user
 @app.route('/dashboard')
 @login_required
 def index():
-    return render_template("dashboard.html",name = current_user.name)
+    return render_template("dashboard.html",name =current_user.name)
