@@ -47,22 +47,22 @@ def webscrape():
     print(products)
     for product in products:
         print(product.name,product.price,product.last_scraped)
-    return render_template("webscrape.html")
+    return render_template("webscrape.html",name=current_user.name)
 
 @app.route('/setting')
 @login_required
 def setting():
-    return render_template("setting.html")
+    return render_template("setting.html",name=current_user.name)
 
 @app.route('/report')
 @login_required
 def report():
-    return render_template("report.html")
+    return render_template("report.html",name=current_user.name)
 
 #internal use, not visible in nav bar
 @app.route('/newproduct')
 def create_product():
-    return render_template('new_products.html')
+    return render_template('new_products.html',name=current_user.name)
 
 from model import db
 import datetime
@@ -87,4 +87,4 @@ def new_product():
     else:
         msg = "Failed to insert " + name + " product."
 
-    return render_template('product_status.html',msg=msg)
+    return render_template('product_status.html',msg=msg,name=current_user.name)
