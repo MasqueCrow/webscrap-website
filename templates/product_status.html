@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="col-md-6 offset-md-4" style="margin-top: 5%;">
+  <div  class="alert alert-warning" role="alert">
+    {{msg}}
+  </div>
+
+  Go back to <a href="{{ url_for('create_product') }}">Create Product page</a>
+</div>
+
+{% endblock %}
