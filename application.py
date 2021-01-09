@@ -22,7 +22,6 @@ app.register_blueprint(model_blueprint)
 from flask_login import LoginManager
 from model import User
 
-
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 login_manager.init_app(app)
@@ -39,3 +38,18 @@ from flask_login import login_required, current_user
 @login_required
 def index():
     return render_template("dashboard.html",name =current_user.name)
+
+@app.route('/webscrape')
+@login_required
+def webscrape():
+    return render_template("webscrape.html")
+
+@app.route('/setting')
+@login_required
+def setting():
+    return render_template("setting.html")
+
+@app.route('/report')
+@login_required
+def report():
+    return render_template("report.html")
