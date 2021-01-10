@@ -1,4 +1,5 @@
-<script  src="https://code.jquery.com/jquery-3.5.1.slim.min.js"   integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs="   crossorigin="anonymous"></script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.js"   integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="   crossorigin="anonymous"></script>
 <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/select/1.3.1/js/dataTables.select.min.js"></script>
 
@@ -7,7 +8,7 @@
 
 <script>
   $(document).ready(function() {
-      $('#productTable').DataTable( {
+      var table = $('#productTable').DataTable( {
           columnDefs: [ {
               orderable: false,
               className: 'select-checkbox',
@@ -19,12 +20,36 @@
           },
           order: [[ 1, 'asc' ]]
       } );
-  } );
+
+      $("#table-submit").click(function() {
+
+        var tblData = table.rows('.selected').data();
+        var tmpData;
+
+        var myJSONArr = [];
+
+        $.each(tblData,function(i,val){
+          tmpData = tblData[i];
+          var myJSON = tmpData;
+          myJSONArr.push(myJSON);
+        });
+
+        $.ajax({
+          type : 'POST',
+          url : "{{url_for('scrape_product')}}",
+          data : {'myJSONArrs':JSON.stringify(myJSONArr)}, //data type has to be string
+          success: function(data,status){
+              alert("Pass");
+          }
+
+        });
+
+    });
+  });
 </script>
 {% extends 'base.html' %}
 {% block content %}
 <div class="col-md-9 offset-md-3" style="margin-top: 5%;">
-
   <table id="productTable" class="display" style="width:100%">
           <thead>
               <tr>
@@ -47,6 +72,9 @@
             {% endfor %}
           </tbody>
       </table>
-
+      <div class="form-group">
+           <button type="submit" id="table-submit" class="btn btn-primary btn-lg btn-block">Submit</button>
+      </div>
+    </table>
 </div>
 {% endblock %}

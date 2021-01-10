@@ -45,8 +45,17 @@ def index():
 @login_required
 def webscrape():
     products = Product.query.all()
-
     return render_template("webscrape.html",name=current_user.name,products=products)
+
+import json
+@app.route('/scrapeproduct',methods=['POST'])
+def scrape_product():
+
+    if request.method == "POST":
+        data = request.form['myJSONArrs']
+        print(data)
+
+    return render_template("webscrape.html",name=current_user.name)
 
 @app.route('/setting')
 @login_required
