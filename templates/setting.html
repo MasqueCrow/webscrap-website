@@ -1,6 +1,33 @@
+<head>
+  <link rel="stylesheet" href="../static/css/setting.css">
+</head>
+
 {% extends 'base.html' %}
+
 {% block content %}
 <div class="col-md-9 offset-md-3" style="margin-top: 5%;">
-  <h1 class="title">This is setting page</h1>
+  <h1 class="title">WebScrape Parameter</h1>
+  <form class="needs-validation" method="POST" action="/signup">
+    <div class="form-group row">
+      <label class="col-sm-2 col-form-label label-size">Concurrent request:</label>
+      <div class="col-sm-5 input-vertical-space">
+        <input type="number" class="form-control" default="0">
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label class="col-sm-2 col-form-label label-size">No. of proxy:</label>
+      <div class="col-sm-5 input-vertical-space">
+        <input type="number" class="form-control" default="0">
+      </div>
+    </div>
+
+    <div class="form-group row">
+
+      <div class="col-sm-2 btn-offset input-vertical-space">
+        <button type="submit" class="btn btn-primary">Submit</button>
+     </div>
+    </div>
+  </form>
 </div>
 {% endblock %}

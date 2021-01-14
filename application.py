@@ -47,6 +47,7 @@ def webscrape():
     products = Product.query.all()
     return render_template("webscrape.html",name=current_user.name,products=products)
 
+#ML model integration
 import json
 @app.route('/scrapeproduct',methods=['POST'])
 def scrape_product():
