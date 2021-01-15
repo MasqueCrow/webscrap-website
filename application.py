@@ -51,6 +51,8 @@ def webscrape():
 import json
 @app.route('/scrapeproduct',methods=['POST'])
 def scrape_product():
+    #assume L'oreal has product table (with product asin)
+    #scrape Product Review + user profile
 
     if request.method == "POST":
         data = request.form['myJSONArrs']
