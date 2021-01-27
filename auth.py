@@ -1,6 +1,6 @@
 from flask import Blueprint,render_template,redirect, url_for, request,flash
 from flask_login import login_user,logout_user,login_required
-from werkzeug.security import generate_password_hash, check_password_hash
+from passlib.hash import sha256_crypt
 from model import User
 from model import db
 
@@ -20,7 +20,7 @@ def signup_post():
         flash('Email address already exists')
         return redirect(url_for('auth.signup'))
 
-    new_user = User(email=email, name= name, password=generate_password_hash(password,method='sha256'))
+    new_user = User(email=email, name= name, password=sha256_crypt.hash(password))
 
     #add new user to database
     db.session.add(new_user)
@@ -36,10 +36,11 @@ def login_post():
     print(email,password)
 
     user = User.query.filter_by(email=email).first()
+    print(user.password)
 
     #check if user actually exists
-    #take the user-supplied password, harsh it, and compare it to hashed password in database
-    if not user or not check_password_hash(user.password,password):
+    #take the user-supplied password, hash it, and compare it to hashed password in database
+    if not user or not sha256_crypt.verify(password, user.password):
         flash('Please check your login details and try again.')
         #if user doesn't exist or incorrect password,reload page
         return redirect(url_for('auth.login'))

@@ -11,7 +11,6 @@ migrate = Migrate(app, db)
 class Product(db.Model):
     id = db.Column('student_id',db.Integer,primary_key = True)
     name = db.Column(db.String(50))
-    #price = db.Column(db.Float(precision=2))
     price = db.Column(db.Numeric(10,2))
     last_scraped = db.Column(db.DateTime,nullable=True)
 
@@ -19,5 +18,5 @@ class Product(db.Model):
 class User(UserMixin,db.Model):
     id = db.Column(db.Integer, primary_key=True) # primary keys are required by SQLAlchemy
     email = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(100))
+    password = db.Column(db.String)
     name = db.Column(db.String(1000))
