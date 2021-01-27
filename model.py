@@ -9,8 +9,9 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 class Product(db.Model):
-    id = db.Column('student_id',db.Integer,primary_key = True)
+    asin = db.Column(db.String,primary_key = True)
     name = db.Column(db.String(50))
+    category = db.Column(db.String)
     price = db.Column(db.Numeric(10,2))
     last_scraped = db.Column(db.DateTime,nullable=True)
 
