@@ -79,13 +79,23 @@ def create_product():
 from model import db
 @app.route('/newproducts',methods=['POST'])
 def new_product():
+    asin =request.form.get('asin')
     name = request.form.get('name')
+    category = request.form.get('category')
     price = float(request.form.get('price'))
+    print("asin:",asin,"name:",name,"cat:",category,"price:",price)
 
+    def check_non_empty_space_in_val(input):
+        if name and not name.isspace():
+            return True
+        return False
+
+    #display result status of inserting new product into db
     msg = ""
+
     #check valid value type and string is non-empty/space
-    if isinstance(price,float) and isinstance(name,str) and (name and not name.isspace()) :
-        new_product = Product(name=name,price=price)
+    if isinstance(price,float) and isinstance(name,str) and check_non_empty_space_in_val(name) and check_non_empty_space_in_val(asin):
+        new_product = Product(asin=asin,name=name,price=price,category=category)
 
         #add new product to database
         db.session.add(new_product)
