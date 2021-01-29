@@ -5,29 +5,42 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="col-md-9 offset-md-3" style="margin-top: 5%;">
-  <h1 class="title">WebScrape Parameter</h1>
-  <form class="needs-validation" method="POST" action="/signup">
-    <div class="form-group row">
-      <label class="col-sm-2 col-form-label label-size">Concurrent request:</label>
-      <div class="col-sm-5 input-vertical-space">
-        <input type="number" class="form-control" default="0">
-      </div>
+
+<div class="col-md-6 offset-md-4" style="margin-top: 5%;">
+  <h1>Modify Webscrape Configuration</h1>
+<form method="POST" action="/webscrapeconfig">
+
+  <div class="form-group">
+    <label for="name">Input file path</label>
+    <input type="text" name="input_filepath" class="form-control" required>
+  </div>
+
+  <div class="form-group">
+    <label for="name">Output file path</label>
+    <input type="text" name="output_filepath" class="form-control" required>
+  </div>
+
+  <div class="form-group">
+    <label for="pages_crawl">No. of pages to crawl</label>
+    <input name="no_of_pg_crawl" type="number" step="" class="form-control dropdown-size" required>
+  </div>
+
+    <div class="form-group">
+      <label for="retry">No. of retry</label>
+      <input name="no_of_retry" type="number" step="" class="form-control dropdown-size" required>
     </div>
 
-    <div class="form-group row">
-      <label class="col-sm-2 col-form-label label-size">No. of proxy:</label>
-      <div class="col-sm-5 input-vertical-space">
-        <input type="number" class="form-control" default="0">
-      </div>
+    <div class="form-group">
+      <label for="">Consolidated file path</label>
+      <input type="text" name="con_file_path" class="form-control" required>
     </div>
 
-    <div class="form-group row">
-
-      <div class="col-sm-2 btn-offset input-vertical-space">
-        <button type="submit" class="btn btn-primary">Submit</button>
-     </div>
+    <div class="form-group">
+      <label for="">Log file path</label>
+      <input type="text" name="log" class="form-control" required>
     </div>
-  </form>
+
+  <button type="submit" class="btn btn-primary" style="margin-top:2%">Submit</button>
+</form>
 </div>
 {% endblock %}

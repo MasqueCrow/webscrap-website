@@ -21,3 +21,12 @@ class User(UserMixin,db.Model):
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String)
     name = db.Column(db.String(1000))
+
+class Setting(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    input_filepath = db.Column(db.String)
+    output_filepath = db.Column(db.String)
+    consolidated_filepath = db.Column(db.String)
+    log_filepath = db.Column(db.String)
+    no_of_pg_crawl = db.Column(db.Integer)
+    no_of_retry = db.Column(db.Integer)
