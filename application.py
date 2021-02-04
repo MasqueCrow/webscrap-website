@@ -2,7 +2,7 @@ from flask import Flask, render_template,request
 import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/loreal_db.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = os.urandom(24)
 
@@ -22,6 +22,7 @@ app.register_blueprint(model_blueprint)
 from flask_login import LoginManager
 from model import User
 from model import Product
+from model import Setting
 
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
@@ -35,6 +36,12 @@ def load_user(user_id):
 
 from flask_login import login_required, current_user
 
+def check_non_empty_space_in_val(input):
+    if input and not input.isspace():
+        return True
+    return False
+
+
 @app.route('/dashboard')
 @login_required
 def index():
@@ -45,6 +52,7 @@ def index():
 @login_required
 def webscrape():
     products = Product.query.all()
+
     return render_template("webscrape.html",name=current_user.name,products=products)
 
 #ML model integration
@@ -63,7 +71,60 @@ def scrape_product():
 @app.route('/setting')
 @login_required
 def setting():
-    return render_template("setting.html",name=current_user.name)
+    #Retrieve the last setting record
+    obj = db.session.query(Setting).order_by(Setting.id.desc()).first()
+    input_path = obj.input_filepath
+    output_path = obj.output_filepath
+    no_of_pg_crawl = obj.no_of_pg_crawl
+    no_of_retry = obj.no_of_retry
+    con_path = obj.consolidated_filepath
+    log_path = obj.log_filepath
+
+
+    #obj.no_of_pg_crawl,obj.no_of_retry)
+
+    return render_template(
+            "setting.html",name=current_user.name,
+            input_path = input_path,
+            output_path = output_path,
+            no_of_pg_crawl = no_of_pg_crawl,
+            no_of_retry = no_of_retry,
+            con_path = con_path,
+            log_path = log_path
+            )
+
+
+@app.route('/webscrapeconfig',methods=['POST'])
+@login_required
+def insert_setting_record():
+    input_path = request.form.get('input_path')
+    output_path = request.form.get('output_path')
+    no_of_pg_crawl = int(request.form.get('no_of_pg_crawl'))
+    no_of_retry = int(request.form.get('no_of_retry'))
+    con_path = request.form.get('con_path')
+    log_path = request.form.get('log_path')
+
+    #display result status of inserting new product into db
+    msg = ""
+
+    #Validate inputs are string and integers before inserting records
+    if (isinstance(no_of_pg_crawl,int) and isinstance(no_of_retry,int) and
+    check_non_empty_space_in_val(input_path) and check_non_empty_space_in_val(output_path) and
+    check_non_empty_space_in_val(con_path) and check_non_empty_space_in_val(log_path) ):
+
+        new_setting = Setting(input_filepath = input_path,output_filepath = output_path,consolidated_filepath=con_path,log_filepath=log_path,no_of_pg_crawl = no_of_pg_crawl,no_of_retry = no_of_retry)
+
+        #add new record setting to database
+        db.session.add(new_setting)
+        db.session.commit()
+
+        msg = "All webscrap variables have been successfully added to the database."
+
+    else:
+        msg = "Failed to insert variable configs into database."
+
+
+    return render_template('setting_status.html',msg=msg,name=current_user.name)
 
 @app.route('/report')
 @login_required
@@ -85,10 +146,6 @@ def new_product():
     price = float(request.form.get('price'))
     print("asin:",asin,"name:",name,"cat:",category,"price:",price)
 
-    def check_non_empty_space_in_val(input):
-        if name and not name.isspace():
-            return True
-        return False
 
     #display result status of inserting new product into db
     msg = ""

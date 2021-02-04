@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="col-md-6 offset-md-4" style="margin-top: 5%;">
+  <div  class="alert alert-warning" role="alert">
+    {{msg}}
+  </div>
+
+  Go back to <a href="{{ url_for('setting') }}">Modify Webscrape Config</a>
+</div>
+
+{% endblock %}

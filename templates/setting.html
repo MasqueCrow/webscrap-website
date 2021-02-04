@@ -12,32 +12,32 @@
 
   <div class="form-group">
     <label for="name">Input file path</label>
-    <input type="text" name="input_filepath" class="form-control" required>
+    <input type="text" name="input_path" class="form-control" value ="{{input_path}}" required>
   </div>
 
   <div class="form-group">
     <label for="name">Output file path</label>
-    <input type="text" name="output_filepath" class="form-control" required>
+    <input type="text" name="output_path" class="form-control" value ="{{output_path}}" required>
   </div>
 
   <div class="form-group">
     <label for="pages_crawl">No. of pages to crawl</label>
-    <input name="no_of_pg_crawl" type="number" step="" class="form-control dropdown-size" required>
+    <input name="no_of_pg_crawl" type="number" step="" class="form-control dropdown-size" value ="{{no_of_pg_crawl}}" required>
   </div>
 
     <div class="form-group">
       <label for="retry">No. of retry</label>
-      <input name="no_of_retry" type="number" step="" class="form-control dropdown-size" required>
+      <input name="no_of_retry" type="number" step="" class="form-control dropdown-size" value ="{{no_of_retry}}" required>
     </div>
 
     <div class="form-group">
       <label for="">Consolidated file path</label>
-      <input type="text" name="con_file_path" class="form-control" required>
+      <input type="text" name="con_path" class="form-control" value ="{{con_path}}" required>
     </div>
 
     <div class="form-group">
       <label for="">Log file path</label>
-      <input type="text" name="log" class="form-control" required>
+      <input type="text" name="log_path" class="form-control" value ="{{log_path}}" required>
     </div>
 
   <button type="submit" class="btn btn-primary" style="margin-top:2%">Submit</button>
