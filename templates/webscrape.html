@@ -54,8 +54,9 @@
           <thead>
               <tr>
                 <th></th>
-                  <th>Id</th>
+                  <th>ASIN</th>
                   <th>Product Name</th>
+                  <th>Category</th>
                   <th>Price</th>
                   <th>Scraped TimeStamp</th>
               </tr>
@@ -64,8 +65,9 @@
             {% for product in products %}
             <tr>
               <td></td>
-              <td>{{ product.id }}</td>
+              <td>{{ product.asin }}</td>
               <td>{{ product.name }}</td>
+              <td>{{ product.category }}</td>
               <td>${{ product.price }}</td>
               <td>{{ product.last_scraped }}</td>
             </tr>
