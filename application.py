@@ -1,5 +1,6 @@
 from flask import Flask, render_template,request
 import os
+import json
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
@@ -57,21 +58,90 @@ def webscrape():
 
 #ML model integration
 import json
+from amazonreviews import main_func as m
+
+
 @app.route('/scrapeproduct',methods=['POST'])
 def scrape_product():
-    #assume L'oreal has product table (with product asin)
-    #scrape Product Review + user profile
+    #Retrieve last setting record
+    obj = db.session.query(Setting).order_by(Setting.id.desc()).first()
+    input_path = obj.input_filepath
+    output_path = obj.output_filepath
+    no_of_pg_crawl = obj.no_of_pg_crawl
+    no_of_retry = obj.no_of_retry
+    con_path = obj.consolidated_filepath
+    log_path = obj.log_filepath
 
+    config = {
+        'input_path': input_path,
+        'output_path': output_path,
+        'no_of_pg_crawl': no_of_pg_crawl,
+        'no_of_retry': no_of_retry,
+        'con_path': con_path,
+        'log_path': log_path
+    }
+
+    #Retrieve ASIN from selected products and stored it in a list
+    asin_list = []
     if request.method == "POST":
         data = request.form['myJSONArrs']
-        print(data)
+        data = json.loads(data)
+        print(data,type(data))
+
+        for record in data:
+            asin = record[1]
+            asin_list.append(asin)
+
+    # create urls to scrape reviews and products from a csv containing product ASINs
+    m.create_urls(asin_list)
+
+    #Find the basepath to this project folder
+    basepath = os.path.dirname(__file__)
+
+    #basepath for all combined funcs (review,product,profile)
+    combined_output_basepath = os.path.join(basepath,'amazonreviews',config['output_path'])
+    combined_con_basepath = os.path.join(basepath,'amazonreviews',config['con_path'])
+
+    #paths for combine_review parameters
+    com_review_output_path = os.path.join(combined_output_basepath, 'reviews')
+    com_review_con_path = os.path.join(combined_con_basepath,'reviews')
+
+
+    # Scrape reviews
+    # TODO: Update to include rotation for googlebots2.1 in the useragents (See documentation)
+    #m.get_reviews(config)
+    #m.get_outstanding_reviews(config)
+    #m.combine_reviews(com_review_output_path, com_review_con_path)
+
+    #paths for combine_products parameters
+    #com_product_output_path = os.path.join(combined_output_basepath, 'products')
+    #com_product_con_path = os.path.join(combined_con_basepath,'products')
+
+    #  Scrape products
+    #  TODO: Update to include rotation for googlebots2.1 in the useragents (See documentation)
+    #m.get_products(config)
+    #m.get_outstanding_products(config)
+    #m.combine_products(com_product_output_path, com_product_con_path)
+
+
+    # Obtain profile urls from scraped reviews in raw
+    #m.get_profile_urls(config)
+
+    #paths for combine_review parameters
+    com_profile_output_path = os.path.join(combined_output_basepath, 'profiles')
+    com_profile_con_path = os.path.join(combined_con_basepath,'profiles')
+
+    # Scrape profiles
+    #m.get_profiles(config)
+    #m.get_outstanding_profiles()
+    #m.combine_profiles(com_profile_output_path, com_profile_con_path)
 
     return render_template("webscrape.html",name=current_user.name)
 
 @app.route('/setting')
 @login_required
 def setting():
-    #Retrieve the last setting record
+    #Retrieve last setting record
     obj = db.session.query(Setting).order_by(Setting.id.desc()).first()
     input_path = obj.input_filepath
     output_path = obj.output_filepath
@@ -81,7 +151,6 @@ def setting():
     log_path = obj.log_filepath
 
 
-    #obj.no_of_pg_crawl,obj.no_of_retry)
 
     return render_template(
             "setting.html",name=current_user.name,
