@@ -3,13 +3,15 @@ import os
 from datetime import datetime
 from subprocess import call
 
-from amazonreviews.gcpFunctions import create_bq_client, upload_csv_as_df
+#from amazonreviews.gcpFunctions import create_bq_client, upload_csv_as_df
 from amazonreviews.stitch import combine_products, combine_profiles, combine_reviews
 
 import configargparse
 import pandas as pd
 
-#Contains functions oringinally from main.py
+import time
+
+#Contains functions imported from main.py
 
 def get_reviews(config):
 
@@ -24,6 +26,7 @@ def get_reviews(config):
 
     url_df = pd.read_csv(input_path)
     for ind, row in url_df.iterrows():
+
         curr_url = row['url']
         curr_asin = curr_url.split('/')[4]
 
@@ -67,16 +70,17 @@ def get_outstanding_reviews(config):
         cleared_df['scraped'] = 1
         updated_df = pd.concat([cleared_df, outstanding_df])
         updated_df.to_csv(log_output, index=False)
-        
 
-def get_outstanding_profiles(args):
+
+def get_outstanding_profiles(config):
     """
     Retries crawling the outstanding profiles that were unable to be retrieved in get_profiles. Updates the outstanding
     logs after every try.
     """
-    log_output = args.log_output + "outstanding_profiles.csv"
-    output_dir = args.output_dir + "/profiles"
-    num_retry = int(args.num_retry)
+    basepath = os.path.dirname(__file__)
+    log_output = os.path.join(basepath,config['log_path'],"outstanding_profiles.csv")
+    output_dir = os.path.join(basepath,config['output_path'],"profiles")
+    num_retry = int(config['no_of_retry'])
 
     cnt = 0
     while cnt < num_retry:
