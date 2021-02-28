@@ -1,0 +1,66 @@
+<head>
+  <meta charset="utf-8">
+<!--  <meta http-equiv="refresh" content="10">-->
+</head>
+{% extends 'base.html' %}
+
+<!DOCTYPE html>
+
+{% block content %}
+<div class="row">
+<div class="col-md-6 offset-md-4" style="margin-top: 5%;"">
+
+  <div  class="alert alert-warning" role="alert">
+    {% if msg is defined %}
+      {{msg}}
+    {% endif %}
+  </div>
+  </div>
+  </div>
+
+  <div class="row" style="width:75%;margin-left:16%;">
+    <div class="col-md-3 offset-md-1">
+  <form method="POST" action="/webscrapestatus">
+    <button type="submit" class="btn btn-primary" style="margin-top:2%">Status Update</button>
+  </form>
+  </div>
+  </div>
+
+  <div class="row" style="width:75%;margin-left:17%;">
+  <div class="col-sm-3 offset-sm-1 col-md-3 offset-md-1" style="background-color:#cae0f7;width:250px;height:250px;">
+    <img src='/static/img/review.svg' style="width:100px;display:block;margin-left:auto;margin-right:auto;margin-top:15%" />
+
+    <p style="font-size:37px;text-align:center;margin-bottom:0%;">{{review_url_count}}</p>
+    <p style="text-align:center;font-size:20px;">Crawled Reviews</p>
+  </div>
+
+  <div class="col-sm-3 offset-sm-1 col-md-3 offset-md-1" style="background-color:#cae0f7;width:250px;height:250px;">
+    <img src='/static/img/user.svg' style="width:100px;display:block;margin-left:auto;margin-right:auto;margin-top:15%" />
+
+    <p style="font-size:37px;text-align:center;margin-bottom:0%;">{{profile_url_count}}</p>
+    <p style="text-align:center;font-size:20px;">Crawled Profiles</p>
+  </div>
+
+  <div class="col-sm-3 offset-sm-1  col-md-3 offset-md-1" style="background-color:#cae0f7;width:250px;height:250px;">
+    <img src='/static/img/gift.svg' style="width:100px;display:block;margin-left:auto;margin-right:auto;margin-top:15%" />
+
+    <p style="font-size:37px;text-align:center;margin-bottom:0%;">{{product_url_count}}</p>
+    <p style="text-align:center;font-size:20px;">Crawled Products</p>
+  </div>
+  </div>
+  <!-- display update count -->
+
+  <!-- Print complete status & show link to stop refresh with type button  -->
+  <div class="row">
+  <div class="col-md-6 offset-md-4" style="margin-top: 5%;"">
+
+
+    <div  class="alert alert-warning" role="alert">
+      Head to <a href="http://127.0.0.1:5000/dashboard" style="text-decoration: none;">dashboard.</a>
+      {{complete_msg}}
+    </div>
+
+
+  </div>
+  </div>
+  {% endblock %}

@@ -8,16 +8,55 @@
 
 <div class="col-md-6 offset-md-4" style="margin-top: 5%;">
   <h1>Modify Webscrape Configuration</h1>
-<form method="POST" action="/webscrapeconfig">
 
-  <div class="form-group">
-    <label for="name">Input file path</label>
-    <input type="text" name="input_path" class="form-control" value ="{{input_path}}" required>
+<form method="POST" action="/webscrapeconfig">
+    <h3>Scrapy Settings</h3>
+    <div class="form-group">
+      <label for="name">Enable Rotating Proxy </label>
+      {% if rotate_proxy == True %}
+      <select class="form-control" name="rotate_proxy">
+        <option selected="selected" value='True'>True</option>
+        <option value=''>False</option>
+      </select>
+
+      {% else %}
+      <select class="form-control" name="rotate_proxy">
+        <option value='True'>True</option>
+        <option selected="selected" value=''>False</option>
+      </select>
+      {% endif %}
+    </div>
+
+    <br/>
+
+    <div class="form-group">
+      <label for="name">Fetch Proxies</label>
+      <input name="fetch_proxies" type="number" step="" class="form-control dropdown-size" value ="{{fetch_proxies}}" required>
+    </div>
+
+    <div class="form-group">
+      <label for="name">No. of Rotating Proxy Retry</label>
+      <input name="rotating_proxy_page_retry" type="number" step="" class="form-control dropdown-size" value ="{{rotating_proxy_page_retry}}" required>
+    </div>
+
+    <div class="form-group">
+      <label for="name">Retry Times</label>
+      <input name="no_of_retry" type="number" step="" class="form-control dropdown-size" value ="{{no_of_retry}}" required>
   </div>
 
   <div class="form-group">
-    <label for="name">Output file path</label>
-    <input type="text" name="output_path" class="form-control" value ="{{output_path}}" required>
+    <label for="name">Concurrent request</label>
+    <input name="no_of_concurrent_request" type="number" step="" class="form-control dropdown-size" value ="{{no_of_concurrent_request}}" required>
+  </div>
+
+  <div class="form-group">
+    <label for="name">Download Delay</label>
+    <input name="download_delay" type="number" step="" class="form-control dropdown-size" value ="{{download_delay}}" required>
+  </div>
+
+  <div class="form-group">
+    <label for="name">Download Timeout</label>
+    <input name="download_timeout" type="number" step="" class="form-control dropdown-size" value ="{{download_timeout}}" required>
   </div>
 
   <div class="form-group">
@@ -29,6 +68,19 @@
       <label for="retry">No. of retry</label>
       <input name="no_of_retry" type="number" step="" class="form-control dropdown-size" value ="{{no_of_retry}}" required>
     </div>
+
+  <br/>
+  <h3>File Directory Settings</h3>
+
+  <div class="form-group">
+    <label for="name">Input file path</label>
+    <input type="text" name="input_path" class="form-control" value ="{{input_path}}" required>
+  </div>
+
+  <div class="form-group">
+    <label for="name">Output file path</label>
+    <input type="text" name="output_path" class="form-control" value ="{{output_path}}" required>
+  </div>
 
     <div class="form-group">
       <label for="">Consolidated file path</label>

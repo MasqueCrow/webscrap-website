@@ -1,0 +1,213 @@
+[2021-02-18 18:49:52,524: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 2.00 seconds... (1/100)
+
+[2021-02-18 18:49:54,538: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 4.00 seconds... (2/100)
+
+[2021-02-18 18:49:58,555: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 6.00 seconds... (3/100)
+
+[2021-02-18 18:50:04,583: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 8.00 seconds... (4/100)
+
+[2021-02-18 18:50:12,608: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 10.00 seconds... (5/100)
+
+[2021-02-18 18:50:22,637: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 12.00 seconds... (6/100)
+
+[2021-02-18 18:50:34,675: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 14.00 seconds... (7/100)
+
+[2021-02-18 18:50:49,041: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 2.00 seconds... (1/100)
+
+[2021-02-18 18:50:51,053: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 4.00 seconds... (2/100)
+
+[2021-02-18 18:51:42,834: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 2.00 seconds... (1/100)
+
+[2021-02-18 18:51:44,848: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 4.00 seconds... (2/100)
+
+[2021-02-18 18:51:48,861: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 6.00 seconds... (3/100)
+
+[2021-02-18 18:51:54,881: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 8.00 seconds... (4/100)
+
+[2021-02-18 18:52:02,900: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 10.00 seconds... (5/100)
+
+[2021-02-18 18:52:12,923: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 12.00 seconds... (6/100)
+
+[2021-02-18 18:52:31,516: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 2.00 seconds... (1/100)
+
+[2021-02-18 18:52:33,526: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 4.00 seconds... (2/100)
+
+[2021-02-18 18:52:37,536: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 6.00 seconds... (3/100)
+
+[2021-02-18 18:52:43,554: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 8.00 seconds... (4/100)
+
+[2021-02-18 18:52:51,569: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 10.00 seconds... (5/100)
+
+[2021-02-18 18:53:01,595: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 12.00 seconds... (6/100)
+
+[2021-02-18 18:53:13,634: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 14.00 seconds... (7/100)
+
+[2021-02-18 18:53:27,682: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 16.00 seconds... (8/100)
+
+[2021-02-18 18:53:43,738: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 18.00 seconds... (9/100)
+
+[2021-02-18 18:54:01,786: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 20.00 seconds... (10/100)
+
+[2021-02-18 18:54:21,818: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 22.00 seconds... (11/100)
+
+[2021-02-18 18:54:43,845: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 24.00 seconds... (12/100)
+
+[2021-02-18 18:55:07,877: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 26.00 seconds... (13/100)
+
+[2021-02-18 18:55:33,902: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 28.00 seconds... (14/100)
+
+[2021-02-18 18:56:01,933: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 30.00 seconds... (15/100)
+
+[2021-02-18 18:56:31,980: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 18:57:04,025: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 18:57:36,088: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 18:58:08,140: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 18:58:40,235: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 18:59:12,350: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 18:59:44,467: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:00:16,565: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:00:48,670: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:01:20,769: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:01:52,852: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:02:24,939: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:02:57,052: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:03:29,158: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:04:01,258: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:04:33,387: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:05:05,522: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:05:37,626: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:06:09,788: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:06:41,902: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:07:14,005: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:07:46,160: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:08:18,271: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:08:50,384: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:09:22,511: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:09:54,632: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:10:26,730: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:10:58,855: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:11:30,981: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:12:03,103: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:12:35,243: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:13:07,391: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:13:39,507: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:14:11,592: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:14:43,646: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:15:15,721: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:15:47,782: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:16:19,869: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:16:51,944: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:17:24,010: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+
+[2021-02-18 19:17:56,112: ERROR/MainProcess] consumer: Cannot connect to amqp://guest:**@127.0.0.1:5672//: [Errno 61] Connection refused.
+Trying again in 32.00 seconds... (16/100)
+

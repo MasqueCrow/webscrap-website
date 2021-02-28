@@ -1,69 +1,184 @@
-from flask import Flask, render_template,request
-import os
-import json
+from flask_login import login_required, current_user
+from flask import Flask, render_template,request, jsonify
+from amazonreviews import main_func as m
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = os.urandom(24)
+import time
+import os
+
+import json
+import threading
+
+from extensions import db
+from extensions import migrate
+from extensions import login_manager
+
+from auth import auth as auth_blueprint
+from model import model as model_blueprint
+
+from celery import Celery
+from celery_once import QueueOnce
+
+from watchdog.observers import Observer
+from watchdog.events import PatternMatchingEventHandler
+
+def make_celery(app):
+    celery = Celery(
+        app.import_name,
+        backend=app.config['CELERY_RESULT_BACKEND'],
+        broker=app.config['CELERY_BROKER_URL']
+    )
+    celery.conf.update(app.config)
+
+    class ContextTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery.Task = ContextTask
+
+    return celery
+
+def create_app():
+    app = Flask(__name__)
+    with app.app_context():
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        app.secret_key = os.urandom(24)
+
+        #Celery configuration
+        app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
+        app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
+        app.config['CELERY_CREATE_MISSING_QUEUES'] = True
+
+
+        db.init_app(app)
+        migrate.init_app(app,db)
+        login_manager.init_app(app)
+
+        app.register_blueprint(auth_blueprint)
+        app.register_blueprint(model_blueprint)
+    return app
 
 def __init__(self,name,price,last_scraped):
     self.name = name
     self.price = price
     self.last_scraped = last_scraped
 
-# blueprint for auth routes in our app
-from auth import auth as auth_blueprint
-app.register_blueprint(auth_blueprint)
 
-# blueprint for models
-from model import model as model_blueprint
-app.register_blueprint(model_blueprint)
+def configure_setting(app):
+    with app.app_context():
+        from model import Setting
+        obj = db.session.query(Setting).order_by(Setting.id.desc()).first()
 
-from flask_login import LoginManager
-from model import User
-from model import Product
-from model import Setting
+        rotate_proxy = obj.rotate_proxy
+        fetch_proxies = obj.fetch_proxies
+        rotating_proxy_page_retry = obj.rotating_proxy_page_retry
+        no_of_concurrent_request = obj.no_of_concurrent_request
+        download_delay = obj.download_delay
+        download_timeout = obj.download_timeout
+        no_of_retry = obj.no_of_retry
 
-login_manager = LoginManager()
-login_manager.login_view = 'auth.login'
-login_manager.init_app(app)
+        configure_setting = {
+        'RETRY_TIMES': no_of_retry,
+        'CONCURRENT_REQUESTS': no_of_concurrent_request,
+        'DOWNLOAD_DELAY': download_delay,
+        'DOWNLOAD_TIMEOUT': download_timeout,
+        'NUMBER_OF_PROXIES_TO_FETCH': fetch_proxies ,
+        'ROTATING_PROXY_PAGE_RETRY_TIMES': rotating_proxy_page_retry,
+        'ROTATED_PROXY_ENABLED': rotate_proxy
+        }
+
+
+    return configure_setting
+
+app = create_app()
+celery = make_celery(app)
 
 #A user loader tells Flask-Login how to find a specific user from the ID that is stored in their session cookie
+login_manager.login_view = 'auth.login'
 @login_manager.user_loader
 def load_user(user_id):
+    from model import User
     # since the user_id is just the primary key of our user table, use it in the query for the user
     return User.query.get(int(user_id))
 
-from flask_login import login_required, current_user
 
 def check_non_empty_space_in_val(input):
     if input and not input.isspace():
         return True
     return False
 
-
 @app.route('/dashboard')
 @login_required
 def index():
+    #create link to navigate back to  webscrape status
     return render_template("dashboard.html",name=current_user.name)
-
 
 @app.route('/webscrape')
 @login_required
 def webscrape():
+    from model import Product
     products = Product.query.all()
 
     return render_template("webscrape.html",name=current_user.name,products=products)
 
-#ML model integration
-import json
-from amazonreviews import main_func as m
+#Clear content of counter file at the beginning of running webscrape tool
+def clear_file(filename):
+    open('crawl_progress/'+filename,'w').close()
+
+#initalise webcrawling variable status
+review_status = False
+profile_status = False
+product_status = False
+
+@celery.task()
+def get_review_profile(config,com_review_output_path,com_review_con_path,com_profile_output_path, com_profile_con_path):
+    clear_file('review.txt')
+    clear_file('profile.txt')
+
+    m.get_reviews(config)
+    m.get_outstanding_reviews(config)
+    m.combine_reviews(com_review_output_path, com_review_con_path)
+
+    #Update review status when crawling has been completed
+    global review_status
+    review_status = True
 
 
+    # Obtain profile urls from scraped reviews in raw
+    m.get_profile_urls(config)
+
+    # Scrape profiles
+    m.get_profiles(config)
+    m.get_outstanding_profiles(config)
+    m.combine_profiles(com_profile_output_path, com_profile_con_path)
+
+    #Update profile status when crawling has been completed
+    global profile_status
+    profile_status = True
+
+@celery.task()
+def get_product(config,com_product_output_path, com_product_con_path):
+    clear_file('product.txt')
+    m.get_products(config)
+    m.get_outstanding_products(config)
+    m.combine_products(com_product_output_path, com_product_con_path)
+
+    #Update product status when crawling has been completed
+    global product_status
+    product_status = True
+
+review_url_count = 0
+profile_url_count = 0
+product_url_count = 0
+###################################################
 @app.route('/scrapeproduct',methods=['POST'])
+@login_required
 def scrape_product():
-    #Retrieve last setting record
+
+    from model import Setting
+
+    #Retrieve last record in setting model
     obj = db.session.query(Setting).order_by(Setting.id.desc()).first()
     input_path = obj.input_filepath
     output_path = obj.output_filepath
@@ -106,41 +221,63 @@ def scrape_product():
     com_review_output_path = os.path.join(combined_output_basepath, 'reviews')
     com_review_con_path = os.path.join(combined_con_basepath,'reviews')
 
-
-    # Scrape reviews
-    # TODO: Update to include rotation for googlebots2.1 in the useragents (See documentation)
-    #m.get_reviews(config)
-    #m.get_outstanding_reviews(config)
-    #m.combine_reviews(com_review_output_path, com_review_con_path)
-
-    #paths for combine_products parameters
-    #com_product_output_path = os.path.join(combined_output_basepath, 'products')
-    #com_product_con_path = os.path.join(combined_con_basepath,'products')
-
-    #  Scrape products
-    #  TODO: Update to include rotation for googlebots2.1 in the useragents (See documentation)
-    #m.get_products(config)
-    #m.get_outstanding_products(config)
-    #m.combine_products(com_product_output_path, com_product_con_path)
-
-
-    # Obtain profile urls from scraped reviews in raw
-    #m.get_profile_urls(config)
-
-    #paths for combine_review parameters
+    #paths for combine_profile parameters
     com_profile_output_path = os.path.join(combined_output_basepath, 'profiles')
     com_profile_con_path = os.path.join(combined_con_basepath,'profiles')
 
-    # Scrape profiles
-    #m.get_profiles(config)
-    #m.get_outstanding_profiles()
-    #m.combine_profiles(com_profile_output_path, com_profile_con_path)
+    #invoke review and profile celery task (reviews ->profile)
+    get_review_profile.apply_async(queue='queue1',args=(config,com_review_output_path,com_review_con_path,com_profile_output_path, com_profile_con_path))
 
-    return render_template("webscrape.html",name=current_user.name)
+    #paths for combine_products parameters
+    com_product_output_path = os.path.join(combined_output_basepath, 'products')
+    com_product_con_path = os.path.join(combined_con_basepath,'products')
 
+    #invoke product celery task
+    get_product.apply_async(queue='queue2',args=(config,com_product_output_path,com_product_con_path))
+
+    msg = "Webscrape tool has been successfully activated. It might take a while before web crawling is completed. Please check back again later."
+
+    #return jsonify({'var1': review_url_count , 'var2': 2, 'var3': 3 })
+    return render_template("webscrape_progress.html",name=current_user.name,msg=msg,review_url_count = review_url_count,profile_url_count=profile_url_count,product_url_count=product_url_count)
+
+
+def check_crawled_url():
+    global review_url_count
+    global profile_url_count
+    global product_url_count
+
+    review_url_count = sum(1 for line in open('crawl_progress/review.txt'))
+    profile_url_count = sum(1 for line in open('crawl_progress/profile.txt'))
+    product_url_count = sum(1 for line in open('crawl_progress/product.txt'))
+
+@app.route('/webscrapestatus',methods=['GET','POST'])
+@login_required
+def webscrapestatus():
+    check_crawled_url()
+
+    global review_url_count
+    global profile_url_count
+    global product_url_count
+
+    msg = "Webscrape tool has been successfully activated. It might take a while before web crawling is completed. Please check back again later."
+    complete_msg = ""
+
+    if review_status and profile_status and product_status:
+        complete_msg = "Web scraping has been completed."
+
+
+    return render_template("webscrape_progress.html",name=current_user.name,
+                           review_url_count = review_url_count,
+                           profile_url_count=profile_url_count,
+                           product_url_count=product_url_count,
+                           msg=msg,complete_msg=complete_msg)
+
+#Retrieve last record in db and populate values in settings form
 @app.route('/setting')
 @login_required
 def setting():
+    from model import Setting
+
     #Retrieve last setting record
     obj = db.session.query(Setting).order_by(Setting.id.desc()).first()
     input_path = obj.input_filepath
@@ -150,7 +287,12 @@ def setting():
     con_path = obj.consolidated_filepath
     log_path = obj.log_filepath
 
-
+    rotate_proxy = obj.rotate_proxy
+    fetch_proxies = obj.fetch_proxies
+    rotating_proxy_page_retry = obj.rotating_proxy_page_retry
+    no_of_concurrent_request = obj.no_of_concurrent_request
+    download_delay = obj.download_delay
+    download_timeout = obj.download_timeout
 
     return render_template(
             "setting.html",name=current_user.name,
@@ -159,13 +301,20 @@ def setting():
             no_of_pg_crawl = no_of_pg_crawl,
             no_of_retry = no_of_retry,
             con_path = con_path,
-            log_path = log_path
+            log_path = log_path,
+            rotate_proxy = rotate_proxy,
+            fetch_proxies = fetch_proxies,
+            rotating_proxy_page_retry = rotating_proxy_page_retry,
+            no_of_concurrent_request = no_of_concurrent_request,
+            download_delay = download_delay,
+            download_timeout = download_timeout
             )
-
 
 @app.route('/webscrapeconfig',methods=['POST'])
 @login_required
 def insert_setting_record():
+    from model import Setting
+
     input_path = request.form.get('input_path')
     output_path = request.form.get('output_path')
     no_of_pg_crawl = int(request.form.get('no_of_pg_crawl'))
@@ -173,15 +322,30 @@ def insert_setting_record():
     con_path = request.form.get('con_path')
     log_path = request.form.get('log_path')
 
+    rotate_proxy = bool(request.form.get('rotate_proxy'))
+    fetch_proxies = int(request.form.get('fetch_proxies'))
+    rotating_proxy_page_retry = int(request.form.get('rotating_proxy_page_retry'))
+    no_of_concurrent_request = int(request.form.get('no_of_concurrent_request'))
+    download_delay = int(request.form.get('download_delay'))
+    download_timeout = int(request.form.get('download_timeout'))
+
     #display result status of inserting new product into db
     msg = ""
 
     #Validate inputs are string and integers before inserting records
     if (isinstance(no_of_pg_crawl,int) and isinstance(no_of_retry,int) and
     check_non_empty_space_in_val(input_path) and check_non_empty_space_in_val(output_path) and
-    check_non_empty_space_in_val(con_path) and check_non_empty_space_in_val(log_path) ):
+    check_non_empty_space_in_val(con_path) and check_non_empty_space_in_val(log_path) and
+    isinstance(fetch_proxies,int) and isinstance(rotating_proxy_page_retry,int) and
+    isinstance(no_of_concurrent_request,int) and isinstance(download_delay,int) and
+    isinstance(download_timeout,int)):
 
-        new_setting = Setting(input_filepath = input_path,output_filepath = output_path,consolidated_filepath=con_path,log_filepath=log_path,no_of_pg_crawl = no_of_pg_crawl,no_of_retry = no_of_retry)
+        new_setting = Setting(input_filepath = input_path,output_filepath = output_path,consolidated_filepath=con_path,
+                              log_filepath=log_path,no_of_pg_crawl = no_of_pg_crawl,no_of_retry = no_of_retry,
+                              rotate_proxy = rotate_proxy, fetch_proxies = fetch_proxies,
+                              rotating_proxy_page_retry = rotating_proxy_page_retry,no_of_concurrent_request = no_of_concurrent_request,
+                              download_delay = download_delay, download_timeout = download_timeout)
+
 
         #add new record setting to database
         db.session.add(new_setting)
@@ -206,15 +370,16 @@ def create_product():
     name = "Admin"
     return render_template('new_products.html',name=name)
 
-from model import db
+#from model import db
 @app.route('/newproducts',methods=['POST'])
 def new_product():
+    from model import Product
+
     asin =request.form.get('asin')
     name = request.form.get('name')
     category = request.form.get('category')
     price = float(request.form.get('price'))
     print("asin:",asin,"name:",name,"cat:",category,"price:",price)
-
 
     #display result status of inserting new product into db
     msg = ""

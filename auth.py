@@ -1,8 +1,8 @@
 from flask import Blueprint,render_template,redirect, url_for, request,flash
+from model import User
+from extensions import db
 from flask_login import login_user,logout_user,login_required
 from passlib.hash import sha256_crypt
-from model import User
-from model import db
 
 auth = Blueprint('auth', __name__)
 

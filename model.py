@@ -1,12 +1,9 @@
-from application import app
 from flask import Blueprint
 from flask_login import UserMixin
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+
+from extensions import db
 
 model = Blueprint('model', __name__)
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
 
 class Product(db.Model):
     asin = db.Column(db.String,primary_key = True)
@@ -30,3 +27,10 @@ class Setting(db.Model):
     log_filepath = db.Column(db.String)
     no_of_pg_crawl = db.Column(db.Integer)
     no_of_retry = db.Column(db.Integer)
+
+    rotate_proxy = db.Column(db.Boolean)
+    fetch_proxies = db.Column(db.Integer)
+    rotating_proxy_page_retry = db.Column(db.Integer)
+    no_of_concurrent_request = db.Column(db.Integer)
+    download_delay = db.Column(db.Integer)
+    download_timeout = db.Column(db.Integer)
