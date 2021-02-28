@@ -48,7 +48,7 @@ COOKIES_ENABLED = True
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
-   'amazonreviews.middlewares.StartRequestsCountMiddleware': 200,
+   'webscrap.amazonreviews.middlewares.StartRequestsCountMiddleware': 200,
 }
 
 # Enable or disable downloader middlewares
