@@ -21,6 +21,12 @@ if platform.system() == "Darwin":
     import os, sys
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from items import AmazonProductsItem
+
+    webscrap_path = '/'.join(os.getcwd().split('/'))
+    sys.path.append(webscrap_path)
+    from application import configure_setting
+    from application import app
+
 else:
     from amazonreviews.items import AmazonProductsItem
 
@@ -28,7 +34,9 @@ else:
 class AmazonReviewsSpider(scrapy.Spider):
     # Spider name
     name = 'amazon_products'
-    custom_settings = {}
+
+    custom_settings = configure_setting(app)
+
 
     def __init__(self, *args, **kwargs):
         super(AmazonReviewsSpider, self).__init__(*args, **kwargs)
@@ -118,6 +126,10 @@ class AmazonReviewsSpider(scrapy.Spider):
             time.sleep(wait_time)
 
             ASIN = response.request.url.split('/')[4]
+
+            #append ASIN to file for counter
+            with open(webscrap_path+'/crawl_progress/profile.txt','a') as asin:
+                asin.write(ASIN + '\n')
 
         # Combining the results
         items["ASIN"] = ASIN

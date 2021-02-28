@@ -8,23 +8,30 @@ from datetime import datetime
 import pandas as pd
 import scrapy
 
+
 # To allow Mac to load spider module from parent folder
 if platform.system() == "Darwin":
     import os, sys
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+    path_to_amazon_reviews = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    sys.path.append(path_to_amazon_reviews)
     from items import AmazonReviewsItem
+
+    webscrap_path = '/'.join(os.getcwd().split('/'))
+    sys.path.append(webscrap_path)
+    from application import configure_setting
+    from application import app
 else:
     from amazonreviews.items import AmazonReviewsItem
 
 from scrapy import signals
 
-
-
 # Creating a new class to implement Spider
 class AmazonReviewsSpider(scrapy.Spider):
     # Spider name
     name = 'amazon_reviews'
-    custom_settings = {}
+
+    custom_settings = configure_setting(app)
 
     def __init__(self, *args, **kwargs):
         super(AmazonReviewsSpider, self).__init__(*args, **kwargs)
@@ -63,6 +70,7 @@ class AmazonReviewsSpider(scrapy.Spider):
         :param spider: takes in spider instance
         """
         stats = spider.crawler.stats.get_stats()
+        print("This is stat:",stats)
         prefix = 'start_requests/item_scraped_count/'
         with open(self.log_output, "a") as log_file:
             for url in self.start_urls:
@@ -81,7 +89,13 @@ class AmazonReviewsSpider(scrapy.Spider):
         data = response.css('#cm_cr-review_list')
         # Collecting user reviews
         print("Current URL being scraped: \n\t", response.request.url)
+
         reviews = data.css('div[data-hook="review"]')
+        print(webscrap_path)
+
+        #append url to file for counter
+        with open(webscrap_path+'/crawl_progress/review.txt','a') as url_file:
+            url_file.write(response.request.url + '\n')
 
         # Combining the results
         for review in reviews:

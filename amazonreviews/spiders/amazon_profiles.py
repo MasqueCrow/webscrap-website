@@ -20,6 +20,12 @@ if platform.system() == "Darwin":
     import os, sys
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from items import AmazonProfilesItem
+
+    webscrap_path = '/'.join(os.getcwd().split('/'))
+    sys.path.append(webscrap_path)
+    from application import configure_setting
+    from application import app
+
 else:
     from amazonreviews.items import AmazonProfilesItem
 
@@ -29,6 +35,9 @@ class AmazonReviewsSpider(scrapy.Spider):
     # Spider name
     name = 'amazon_profiles'
     custom_settings = {}
+
+    custom_settings = configure_setting(app)
+
 
     def __init__(self, *args, **kwargs):
         super(AmazonReviewsSpider, self).__init__(*args, **kwargs)
@@ -110,6 +119,7 @@ class AmazonReviewsSpider(scrapy.Spider):
             items["date_scraped"] = date_scraped
 
             yield items
+
         try:
             account_num = response.url.split('amzn1.account.')[-1].split("/")[0]
             # print("account_num", account_num)
@@ -140,6 +150,10 @@ class AmazonReviewsSpider(scrapy.Spider):
             next_url = "https://www.amazon.com/profilewidget/timeline/visitor?nextPageToken=&filteredContributionTypes" \
                        "=productreview%2Cglimpse%2Cideas&directedId=amzn1.account.{acc_num}&token={token}" \
                 .format(acc_num=account_num, token=token)
+
+            #append url to file for counter
+            with open(webscrap_path+'/crawl_progress/profile.txt','a') as url_file:
+                url_file.write(next_url + '\n')
 
             yield scrapy.FormRequest(next_url, callback=self.parse_profile, meta=meta)
             # introduce random delay between requests to reduce risk of being blocked
