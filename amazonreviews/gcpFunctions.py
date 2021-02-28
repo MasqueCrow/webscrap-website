@@ -1,8 +1,7 @@
 import pandas as pd
 import re
-from google.cloud import bigquery
+#from google.cloud import bigquery
 import time
-
 
 def create_bq_client(service_account_credential_path):
 	"""
@@ -47,8 +46,8 @@ def upload_csv(service_account_credential_path, project_name, target_dataset, it
 
 def upload_csv_as_df(service_account_credential_path, project_name, target_dataset, item_type, csv_file_path):
 	"""
-	This function uploads a csv file into a GBQ table with schemas already defined as a dataframe where the 
-	data types can be adjusted to fit the GBQ table schema. 
+	This function uploads a csv file into a GBQ table with schemas already defined as a dataframe where the
+	data types can be adjusted to fit the GBQ table schema.
 	Hence, no need for specifying of schema or auto-detecting from CSV
 
 	Parameters:
