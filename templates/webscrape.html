@@ -16,8 +16,20 @@
               style:    'multi',
               selector: 'td:first-child'
           },
-          order: [[ 1, 'asc' ]]
+          order: [[ 1, 'asc' ]],
+          stateSave: true
       } );
+
+      $('#selectAll').click(function(e) {
+          if($('tr').hasClass('checkedAll')) {
+            $('tr:not(:first)').removeClass('selected');
+            $('tr:not(:first)').removeClass('checkedAll');
+          } else {
+            $('tr:not(:first)').addClass('checkedAll');
+            $('tr:not(:first)').addClass('selected');
+          }
+      });
+
 
       $("#table-submit").click(function() {
 
@@ -40,7 +52,6 @@
              //alert(response['var1']);
              document.write(response);
            }
-
         });
 
     });
@@ -53,7 +64,7 @@
   <table id="productTable" class="display" style="width:100%">
           <thead>
               <tr>
-                <th></th>
+                <th><button type="button" id="selectAll" class="main">Select All</button</th>
                   <th>ASIN</th>
                   <th>Product Name</th>
                   <th>Category</th>
