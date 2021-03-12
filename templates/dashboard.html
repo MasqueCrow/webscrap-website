@@ -1,7 +1,16 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="col-md-9 offset-md-3" style="margin-top: 5%;">
-  <h1 class='title'> This is Dashboard page </h1>
-</div>
+<div id="myTS" class="col-md-6 offset-md-2" ></div>
+<div class="col-md-3" style="margin-top: 2%;">
+<h4 style="text-align:center;">Outstanding Items</h4>
+<canvas id="doughChart"style="width:340px;height:340px"></canvas>
+</div >
+
+
+{% endblock %}
+
+{% block scripts %}
+  <script src="../static/js/doughnut.js"></script>
+  <script src="../static/js/timeseries.js"></script>
 {% endblock %}
