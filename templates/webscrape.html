@@ -13,13 +13,20 @@
               targets:   0
           } ],
           select: {
-              style:    'multi',
+              style: 'multi',
               selector: 'td:first-child'
           },
           order: [[ 1, 'asc' ]],
           stateSave: true
       } );
 
+      $("#table-submit").addClass("disabled");
+
+      $('#productTable tbody').on( 'click', 'tr', function () {
+          $("#table-submit").removeClass("disabled");
+      });
+
+      //select and unselect all checkboxes
       $('#selectAll').click(function(e) {
           if($('tr').hasClass('checkedAll')) {
             $('tr:not(:first)').removeClass('selected');
@@ -27,9 +34,9 @@
           } else {
             $('tr:not(:first)').addClass('checkedAll');
             $('tr:not(:first)').addClass('selected');
+            $("#table-submit").removeClass("disabled");
           }
       });
-
 
       $("#table-submit").click(function() {
 
@@ -39,21 +46,37 @@
         var myJSONArr = [];
 
         $.each(tblData,function(i,val){
+
           tmpData = tblData[i];
           var myJSON = tmpData;
           myJSONArr.push(myJSON);
         });
 
-        $.ajax({
-          type : 'POST',
-          url : "{{url_for('scrape_product')}}",
-          data : {'myJSONArrs':JSON.stringify(myJSONArr)}, //data type has to be string
-          success:function(response){
-             //alert(response['var1']);
-             document.write(response);
-           }
-        });
+        if(myJSONArr.length !=0){
+          $.ajax({
+            type : 'POST',
+            url : "{{url_for('scrape_product')}}",
+            data : {'myJSONArrs':JSON.stringify(myJSONArr)}, //data type has to be string
+            success:function(response){
+               //alert(response['var1']);
+               document.write(response);
+             }
+          });
+        }else{
+            $("#table-submit").addClass("disabled");
+        }
 
+
+    });
+
+      //alert($('.select-checkbox').val());
+    $('.selected').change(function(){
+      alert("hello");
+      if($('tr').hasClass('selected')){
+        $("#table-submit").removeClass("disabled");
+      }else{
+        $("#table-submit").addClass("disabled");
+      }
     });
   });
 </script>
@@ -64,7 +87,7 @@
   <table id="productTable" class="display" style="width:100%">
           <thead>
               <tr>
-                <th><button type="button" id="selectAll" class="main">Select All</button</th>
+                <th><button id="selectAll" class="main">Select All</button</th>
                   <th>ASIN</th>
                   <th>Product Name</th>
                   <th>Category</th>

@@ -2,6 +2,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="col-md-2 offset-md-9" style="margin-top:1%;">
+  <a id="statusBtn" href="http://127.0.0.1:5000/webscrapestatus" type="button"  class="btn btn-info"  style="text-align:center;text-decoration:none;">Return to Scrape Status</a>
+</div>
+
 <div id="myTS" style="margin-top:0.6%;" class="col-md-6 offset-md-2" ></div>
 <div class="col-md-3" style="margin-top:2%;">
   <canvas id="doughChart"style="width:340px;height:340px"></canvas>
@@ -17,6 +21,7 @@
   <canvas id="barChart2"style="height:250px;"></canvas>
 </div>
 
+
 <!--<div id="graphValue" data-value="{{name}}"></div>-->
 
 {% endblock %}
@@ -26,4 +31,15 @@
   <script src="../static/js/timeseries.js"></script>
   <script src="../static/js/bar.js"></script>
   <script src="../static/js/bar2.js"></script>
+  <script>
+    //disable link access to scrape status page when it has not been visited yet
+    var myParam = location.search.split('webscrape_trigger=')[1] ? parseInt(location.search.split('webscrape_trigger=')[1]) : 0;
+
+    if(myParam == 0){
+      document.getElementById("statusBtn").classList.add("disabled");
+    }else{
+      document.getElementById("statusBtn").classList.remove("disabled");
+    }
+
+  </script>
 {% endblock %}
