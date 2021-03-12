@@ -1,3 +1,7 @@
+//code snippet to get value from Jinja template
+//var graphValue = document.getElementById('graphValue').getAttribute('data-value');
+//console.log(graphValue);
+
 var ctx = document.getElementById('doughChart').getContext('2d');
 data = {
     datasets: [{
