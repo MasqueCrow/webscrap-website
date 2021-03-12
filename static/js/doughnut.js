@@ -26,13 +26,16 @@ var myDoughnutChart = new Chart(ctx, {
     type: 'doughnut',
     data: data,
     options: {
+      title: {
+          display: true,
+          text: 'Outstanding Items to Scrape',
+          fontSize: 20,
+          fontStyle: 'normal'
+      },
         maintainAspectRatio: false,
         responsive: false,
         plugins: {
-          labels: [/*{
-            render: 'label',
-            position:'outside',
-          },*/
+          labels: [
             {
               render:'value',
               // font style, default is defaultFontStyle
