@@ -166,11 +166,10 @@ def query_reviews():
 @app.route('/dashboard')
 @login_required
 def index():
-
     #create link to navigate back to  webscrape status
     query_reviews.apply_async(queue='queue3')
 
-    return render_template("dashboard.html",url ='/static/img/alice.jpg')
+    return render_template("dashboard.html",name=current_user.name,url ='/static/img/alice.jpg')
 
 
 @app.route('/webscrape')
