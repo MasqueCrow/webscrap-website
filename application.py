@@ -21,6 +21,13 @@ from celery_once import QueueOnce
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
+from google.cloud import bigquery
+
+from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+from PIL import Image
+import matplotlib.pyplot as plt
+import numpy as np
+
 def make_celery(app):
     celery = Celery(
         app.import_name,
@@ -108,11 +115,63 @@ def check_non_empty_space_in_val(input):
         return True
     return False
 
+@celery.task()
+def query_reviews():
+    project = 'crafty-chiller-276910'
+    cwd = os.getcwd()
+    #change secret key path based on where you store it
+    secret_key_path = os.path.join(cwd,'..','fyp_secret_key.json')
+
+    #initialize bq client
+    client = bigquery.Client.from_service_account_json(secret_key_path)
+
+    query = '''SELECT cleaned_text
+            FROM
+            `crafty-chiller-276910.cleaned_items.reviews`
+            '''
+
+    start = time.time()
+    query_job = client.query(query)
+    print("Time taken to query:",time.time() - start)
+
+    #Convert query to list type
+    result_query = list(query_job.result())
+
+    reviews = " "
+
+    start = time.time()
+
+    #Concatenate all reviews to string format
+    for i in range(len(result_query)):
+        review = result_query[i][0]
+        if review is not None:
+            reviews += review
+
+    #Remove stop words to refine review text
+    stopwords = ['en' ,'tous' ,'ca' ,'le' ,'also', 'im', 'like', 'wa', 'ha', 'tey','est','go','doe','give']
+    preprocessed_text = reviews.split()
+    resultwords  = [word for word in preprocessed_text if word.lower() not  in stopwords and word.isnumeric() == False]
+    result = ' '.join(resultwords)
+
+    #Generate Review wordcloud
+    alice_mask = np.array(Image.open("/Users/jiaweitchea/desktop/fyp/alice3.jpg"))
+
+    wordcloud = WordCloud(background_color='white',
+                      mask=alice_mask,contour_width=1.5, contour_color='steelblue').generate(result)
+
+    image_output_path = os.path.join(cwd,'static/img/alice.jpg')
+    wordcloud.to_file(image_output_path)
+    print("Time taken to generate wordcloud:",time.time() - start)
+
 @app.route('/dashboard')
 @login_required
 def index():
+
     #create link to navigate back to  webscrape status
-    return render_template("dashboard.html",name=current_user.name)
+    query_reviews.apply_async(queue='queue3')
+
+    return render_template("dashboard.html",url ='/static/img/alice.jpg')
+
 
 @app.route('/webscrape')
 @login_required
