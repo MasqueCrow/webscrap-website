@@ -11,7 +11,14 @@ var data = [
 ];
 
 var layout = {
-  title: 'Time Series with Rangeslider',
+  title: {
+    text: 'WebScrape Activity Timeline',
+    font:{
+      family:'Helvetica Neue,Helvetica, Arial, sans-serif',
+      color: '#6c757d',
+      size: 20,
+    }
+  },
   width: 710,
   height: 400,
   xaxis: {

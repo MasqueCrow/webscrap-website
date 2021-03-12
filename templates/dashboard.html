@@ -1,13 +1,19 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div id="myTS" class="col-md-6 offset-md-2" ></div>
+<div id="myTS" style="margin-top:0.6%;" class="col-md-6 offset-md-2" ></div>
 <div class="col-md-3" style="margin-top:2%;">
   <canvas id="doughChart"style="width:340px;height:340px"></canvas>
 </div >
 
-<div class="col-md-6 offset-md-2" style="margin-top:1%;">
-  <img src={{url}} alt="Chart" height="600" style="display:block;margin-left:auto;margin-right:auto;" />
+<div class="col-md-6 offset-md-1" style="margin-top:1%;">
+  <div style="color:#6c757d;font-size:20px;margin-left:40%;margin-top:1%;">Products Reviews Wordcloud</div>
+  <img src={{url}} alt="Chart" height="600" style="display:block;margin-left:35%;" />
+</div>
+
+<div class="col-md-3" style="margin-top:1%;">
+  <canvas id="barChart"style="height:250px;"></canvas>
+  <canvas id="barChart2"style="height:250px;"></canvas>
 </div>
 
 {% endblock %}
@@ -15,4 +21,6 @@
 {% block scripts %}
   <script src="../static/js/doughnut.js"></script>
   <script src="../static/js/timeseries.js"></script>
+  <script src="../static/js/bar.js"></script>
+  <script src="../static/js/bar2.js"></script>
 {% endblock %}
