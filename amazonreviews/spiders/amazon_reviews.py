@@ -9,8 +9,8 @@ import pandas as pd
 import scrapy
 
 
-# To allow Mac to load spider module from parent folder
-if platform.system() == "Darwin":
+# To allow Mac/Linux to load spider module from parent folder
+if platform.system() == "Darwin" or platform.system() == "Linux":
     import os, sys
 
     path_to_amazon_reviews = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
