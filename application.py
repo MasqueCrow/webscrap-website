@@ -155,7 +155,7 @@ def query_reviews():
     result = ' '.join(resultwords)
 
     #Generate Review wordcloud
-    alice_mask = np.array(Image.open("/Users/jiaweitchea/desktop/fyp/alice3.jpg"))
+    alice_mask = np.array(Image.open(cwd,'static/img/alice3.jpg'))
 
     wordcloud = WordCloud(background_color='white',
                       mask=alice_mask,contour_width=1.5, contour_color='steelblue').generate(result)
