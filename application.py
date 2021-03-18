@@ -459,8 +459,7 @@ def report():
 @app.route('/newproduct')
 @login_required
 def create_product():
-    name = "Admin"
-    return render_template('new_products.html',name=name)
+    return render_template('new_products.html',name=current_user.name)
 
 #from model import db
 @app.route('/newproducts',methods=['POST'])
