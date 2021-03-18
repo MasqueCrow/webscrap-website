@@ -84,6 +84,7 @@ def configure_setting(app):
         download_delay = obj.download_delay
         download_timeout = obj.download_timeout
         no_of_retry = obj.no_of_retry
+        tracker_output = obj.tracker_filepath
 
         configure_setting = {
         'RETRY_TIMES': no_of_retry,
@@ -92,9 +93,9 @@ def configure_setting(app):
         'DOWNLOAD_TIMEOUT': download_timeout,
         'NUMBER_OF_PROXIES_TO_FETCH': fetch_proxies ,
         'ROTATING_PROXY_PAGE_RETRY_TIMES': rotating_proxy_page_retry,
-        'ROTATED_PROXY_ENABLED': rotate_proxy
+        'ROTATED_PROXY_ENABLED': rotate_proxy,
+        'tracker_output' : tracker_output
         }
-
 
     return configure_setting
 
@@ -194,7 +195,9 @@ def update_product_scrapetime():
         for url in f:
             asin = url.split("/")[-2]
             asins.add(asin)
-    asins.remove('product-reviews')
+
+    if 'product-reviews' in asins:
+        asins.remove('product-reviews')
 
     #Iterate asins to update last_scraped of products
     for asin in asins:
@@ -371,6 +374,7 @@ def setting():
     no_of_retry = obj.no_of_retry
     con_path = obj.consolidated_filepath
     log_path = obj.log_filepath
+    tracker_path = obj.tracker_filepath
 
     rotate_proxy = obj.rotate_proxy
     fetch_proxies = obj.fetch_proxies
@@ -387,6 +391,7 @@ def setting():
             no_of_retry = no_of_retry,
             con_path = con_path,
             log_path = log_path,
+            tracker_path = tracker_path,
             rotate_proxy = rotate_proxy,
             fetch_proxies = fetch_proxies,
             rotating_proxy_page_retry = rotating_proxy_page_retry,
@@ -406,6 +411,7 @@ def insert_setting_record():
     no_of_retry = int(request.form.get('no_of_retry'))
     con_path = request.form.get('con_path')
     log_path = request.form.get('log_path')
+    tracker_path = request.form.get('tracker_path')
 
     rotate_proxy = bool(request.form.get('rotate_proxy'))
     fetch_proxies = int(request.form.get('fetch_proxies'))
@@ -421,12 +427,13 @@ def insert_setting_record():
     if (isinstance(no_of_pg_crawl,int) and isinstance(no_of_retry,int) and
     check_non_empty_space_in_val(input_path) and check_non_empty_space_in_val(output_path) and
     check_non_empty_space_in_val(con_path) and check_non_empty_space_in_val(log_path) and
+    check_non_empty_space_in_val(tracker_path) and
     isinstance(fetch_proxies,int) and isinstance(rotating_proxy_page_retry,int) and
     isinstance(no_of_concurrent_request,int) and isinstance(download_delay,int) and
     isinstance(download_timeout,int)):
 
-        new_setting = Setting(input_filepath = input_path,output_filepath = output_path,consolidated_filepath=con_path,
-                              log_filepath=log_path,no_of_pg_crawl = no_of_pg_crawl,no_of_retry = no_of_retry,
+        new_setting = Setting(input_filepath = input_path,output_filepath = output_path,consolidated_filepath = con_path,
+                              log_filepath = log_path,tracker_filepath = tracker_path,no_of_pg_crawl = no_of_pg_crawl,no_of_retry = no_of_retry,
                               rotate_proxy = rotate_proxy, fetch_proxies = fetch_proxies,
                               rotating_proxy_page_retry = rotating_proxy_page_retry,no_of_concurrent_request = no_of_concurrent_request,
                               download_delay = download_delay, download_timeout = download_timeout)
