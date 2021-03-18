@@ -125,9 +125,9 @@ def query_reviews():
     #initialize bq client
     client = bigquery.Client.from_service_account_json(secret_key_path)
 
-    query = '''SELECT cleaned_text
-            FROM
-            `crafty-chiller-276910.cleaned_items.reviews`
+    query = '''
+            SELECT cleaned_text
+            FROM `crafty-chiller-276910.cleaned_items.reviews`
             '''
 
     start = time.time()
@@ -175,14 +175,34 @@ def index():
 @app.route('/webscrape')
 @login_required
 def webscrape():
+    update_product_scrapetime()
     from model import Product
     products = Product.query.all()
-
     return render_template("webscrape.html",name=current_user.name,products=products)
 
 #Clear content of counter file at the beginning of running webscrape tool
 def clear_file(filename):
     open('crawl_progress/'+filename,'w').close()
+
+def update_product_scrapetime():
+    from datetime import datetime
+    from model import Product
+
+    #Retrieve crawled asin from review file in crawl_progress folder
+    asins = set()
+    with open('crawl_progress/review.txt','r') as f:
+        for url in f:
+            asin = url.split("/")[-2]
+            asins.add(asin)
+    asins.remove('product-reviews')
+
+    #Iterate asins to update last_scraped of products
+    for asin in asins:
+        last_scraped = datetime.now()
+        product = Product.query.filter_by(asin= asin).first()
+        product.last_scraped = last_scraped
+        db.session.commit()
+        print("product:",product,"time:",product.last_scraped )
 
 #initalise webcrawling variable status
 review_status = False
@@ -202,6 +222,8 @@ def get_review_profile(config,com_review_output_path,com_review_con_path,com_pro
     global review_status
     review_status = True
 
+    #update datetime of products that have been scraped
+    update_product_scrapetime()
 
     # Obtain profile urls from scraped reviews in raw
     m.get_profile_urls(config)
@@ -254,6 +276,8 @@ def scrape_product():
         'log_path': log_path
     }
 
+
+
     #Retrieve ASIN from selected products and stored it in a list
     asin_list = []
     if request.method == "POST":
@@ -264,6 +288,9 @@ def scrape_product():
         for record in data:
             asin = record[1]
             asin_list.append(asin)
+
+    from model import Product
+
 
     # create urls to scrape reviews and products from a csv containing product ASINs
     m.create_urls(asin_list)
@@ -422,8 +449,8 @@ def insert_setting_record():
 def report():
     return render_template("report.html",name=current_user.name)
 
-#internal use, not visible in nav bar
 @app.route('/newproduct')
+@login_required
 def create_product():
     name = "Admin"
     return render_template('new_products.html',name=name)
@@ -437,6 +464,7 @@ def new_product():
     name = request.form.get('name')
     category = request.form.get('category')
     price = float(request.form.get('price'))
+
     print("asin:",asin,"name:",name,"cat:",category,"price:",price)
 
     #display result status of inserting new product into db
