@@ -18,15 +18,6 @@ from model import model as model_blueprint
 from celery import Celery
 from celery_once import QueueOnce
 
-from watchdog.observers import Observer
-from watchdog.events import PatternMatchingEventHandler
-
-from google.cloud import bigquery
-
-from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
-from PIL import Image
-import matplotlib.pyplot as plt
-import numpy as np
 
 def make_celery(app):
     celery = Celery(
@@ -118,6 +109,12 @@ def check_non_empty_space_in_val(input):
 
 @celery.task()
 def query_reviews():
+    from google.cloud import bigquery
+    from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+    from PIL import Image
+    import matplotlib.pyplot as plt
+    import numpy as np
+
     project = 'crafty-chiller-276910'
     cwd = os.getcwd()
     #change secret key path based on where you store it
@@ -155,7 +152,7 @@ def query_reviews():
     result = ' '.join(resultwords)
 
     #Generate Review wordcloud
-    alice_mask = np.array(Image.open(cwd,'static/img/alice3.jpg'))
+    alice_mask = np.array(Image.open(os.join(cwd,'static/img/alice3.jpg')))
 
     wordcloud = WordCloud(background_color='white',
                       mask=alice_mask,contour_width=1.5, contour_color='steelblue').generate(result)
@@ -176,7 +173,6 @@ def index():
 @app.route('/webscrape')
 @login_required
 def webscrape():
-    update_product_scrapetime()
     from model import Product
     products = Product.query.all()
     return render_template("webscrape.html",name=current_user.name,products=products)
