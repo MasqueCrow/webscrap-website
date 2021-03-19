@@ -82,7 +82,7 @@
 </script>
 {% extends 'base.html' %}
 {% block content %}
-<div class="col-md-9 offset-md-3" style="margin-top: 5%;">
+<div class="col-md-10 offset-md-2" style="margin-top: 5%;">
 
   <table id="productTable" class="display" style="width:100%">
           <thead>
@@ -92,7 +92,7 @@
                   <th>Product Name</th>
                   <th>Category</th>
                   <th>Price</th>
-                  <th>Scraped TimeStamp</th>
+                  <th>Last Scraped Date</th>
               </tr>
           </thead>
           <tbody>
@@ -103,7 +103,7 @@
               <td>{{ product.name }}</td>
               <td>{{ product.category }}</td>
               <td>${{ product.price }}</td>
-              <td>{{ product.last_scraped }}</td>
+              <td>{{ product.last_scraped.strftime('%Y-%m-%d') if product.last_scraped != None else product.last_scraped }}</td>
             </tr>
             {% endfor %}
           </tbody>

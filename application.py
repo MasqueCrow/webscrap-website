@@ -18,15 +18,6 @@ from model import model as model_blueprint
 from celery import Celery
 from celery_once import QueueOnce
 
-from watchdog.observers import Observer
-from watchdog.events import PatternMatchingEventHandler
-
-from google.cloud import bigquery
-
-from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
-from PIL import Image
-import matplotlib.pyplot as plt
-import numpy as np
 
 def make_celery(app):
     celery = Celery(
@@ -84,6 +75,7 @@ def configure_setting(app):
         download_delay = obj.download_delay
         download_timeout = obj.download_timeout
         no_of_retry = obj.no_of_retry
+        tracker_output = obj.tracker_filepath
 
         configure_setting = {
         'RETRY_TIMES': no_of_retry,
@@ -92,9 +84,9 @@ def configure_setting(app):
         'DOWNLOAD_TIMEOUT': download_timeout,
         'NUMBER_OF_PROXIES_TO_FETCH': fetch_proxies ,
         'ROTATING_PROXY_PAGE_RETRY_TIMES': rotating_proxy_page_retry,
-        'ROTATED_PROXY_ENABLED': rotate_proxy
+        'ROTATED_PROXY_ENABLED': rotate_proxy,
+        'tracker_output' : tracker_output
         }
-
 
     return configure_setting
 
@@ -117,6 +109,12 @@ def check_non_empty_space_in_val(input):
 
 @celery.task()
 def query_reviews():
+    from google.cloud import bigquery
+    from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+    from PIL import Image
+    import matplotlib.pyplot as plt
+    import numpy as np
+
     project = 'crafty-chiller-276910'
     cwd = os.getcwd()
     #change secret key path based on where you store it
@@ -125,9 +123,9 @@ def query_reviews():
     #initialize bq client
     client = bigquery.Client.from_service_account_json(secret_key_path)
 
-    query = '''SELECT cleaned_text
-            FROM
-            `crafty-chiller-276910.cleaned_items.reviews`
+    query = '''
+            SELECT cleaned_text
+            FROM `crafty-chiller-276910.cleaned_items.reviews`
             '''
 
     start = time.time()
@@ -154,7 +152,7 @@ def query_reviews():
     result = ' '.join(resultwords)
 
     #Generate Review wordcloud
-    alice_mask = np.array(Image.open("/Users/jiaweitchea/desktop/fyp/alice3.jpg"))
+    alice_mask = np.array(Image.open(os.join(cwd,'static/img/alice3.jpg')))
 
     wordcloud = WordCloud(background_color='white',
                       mask=alice_mask,contour_width=1.5, contour_color='steelblue').generate(result)
@@ -177,12 +175,33 @@ def index():
 def webscrape():
     from model import Product
     products = Product.query.all()
-
     return render_template("webscrape.html",name=current_user.name,products=products)
 
 #Clear content of counter file at the beginning of running webscrape tool
 def clear_file(filename):
     open('crawl_progress/'+filename,'w').close()
+
+def update_product_scrapetime():
+    from datetime import datetime
+    from model import Product
+
+    #Retrieve crawled asin from review file in crawl_progress folder
+    asins = set()
+    with open('crawl_progress/review.txt','r') as f:
+        for url in f:
+            asin = url.split("/")[-2]
+            asins.add(asin)
+
+    if 'product-reviews' in asins:
+        asins.remove('product-reviews')
+
+    #Iterate asins to update last_scraped of products
+    for asin in asins:
+        last_scraped = datetime.now()
+        product = Product.query.filter_by(asin= asin).first()
+        product.last_scraped = last_scraped
+        db.session.commit()
+        print("product:",product,"time:",product.last_scraped )
 
 #initalise webcrawling variable status
 review_status = False
@@ -202,6 +221,8 @@ def get_review_profile(config,com_review_output_path,com_review_con_path,com_pro
     global review_status
     review_status = True
 
+    #update datetime of products that have been scraped
+    update_product_scrapetime()
 
     # Obtain profile urls from scraped reviews in raw
     m.get_profile_urls(config)
@@ -254,6 +275,8 @@ def scrape_product():
         'log_path': log_path
     }
 
+
+
     #Retrieve ASIN from selected products and stored it in a list
     asin_list = []
     if request.method == "POST":
@@ -264,6 +287,9 @@ def scrape_product():
         for record in data:
             asin = record[1]
             asin_list.append(asin)
+
+    from model import Product
+
 
     # create urls to scrape reviews and products from a csv containing product ASINs
     m.create_urls(asin_list)
@@ -344,6 +370,7 @@ def setting():
     no_of_retry = obj.no_of_retry
     con_path = obj.consolidated_filepath
     log_path = obj.log_filepath
+    tracker_path = obj.tracker_filepath
 
     rotate_proxy = obj.rotate_proxy
     fetch_proxies = obj.fetch_proxies
@@ -360,6 +387,7 @@ def setting():
             no_of_retry = no_of_retry,
             con_path = con_path,
             log_path = log_path,
+            tracker_path = tracker_path,
             rotate_proxy = rotate_proxy,
             fetch_proxies = fetch_proxies,
             rotating_proxy_page_retry = rotating_proxy_page_retry,
@@ -379,6 +407,7 @@ def insert_setting_record():
     no_of_retry = int(request.form.get('no_of_retry'))
     con_path = request.form.get('con_path')
     log_path = request.form.get('log_path')
+    tracker_path = request.form.get('tracker_path')
 
     rotate_proxy = bool(request.form.get('rotate_proxy'))
     fetch_proxies = int(request.form.get('fetch_proxies'))
@@ -394,12 +423,13 @@ def insert_setting_record():
     if (isinstance(no_of_pg_crawl,int) and isinstance(no_of_retry,int) and
     check_non_empty_space_in_val(input_path) and check_non_empty_space_in_val(output_path) and
     check_non_empty_space_in_val(con_path) and check_non_empty_space_in_val(log_path) and
+    check_non_empty_space_in_val(tracker_path) and
     isinstance(fetch_proxies,int) and isinstance(rotating_proxy_page_retry,int) and
     isinstance(no_of_concurrent_request,int) and isinstance(download_delay,int) and
     isinstance(download_timeout,int)):
 
-        new_setting = Setting(input_filepath = input_path,output_filepath = output_path,consolidated_filepath=con_path,
-                              log_filepath=log_path,no_of_pg_crawl = no_of_pg_crawl,no_of_retry = no_of_retry,
+        new_setting = Setting(input_filepath = input_path,output_filepath = output_path,consolidated_filepath = con_path,
+                              log_filepath = log_path,tracker_filepath = tracker_path,no_of_pg_crawl = no_of_pg_crawl,no_of_retry = no_of_retry,
                               rotate_proxy = rotate_proxy, fetch_proxies = fetch_proxies,
                               rotating_proxy_page_retry = rotating_proxy_page_retry,no_of_concurrent_request = no_of_concurrent_request,
                               download_delay = download_delay, download_timeout = download_timeout)
@@ -422,11 +452,10 @@ def insert_setting_record():
 def report():
     return render_template("report.html",name=current_user.name)
 
-#internal use, not visible in nav bar
 @app.route('/newproduct')
+@login_required
 def create_product():
-    name = "Admin"
-    return render_template('new_products.html',name=name)
+    return render_template('new_products.html',name=current_user.name)
 
 #from model import db
 @app.route('/newproducts',methods=['POST'])
@@ -437,6 +466,7 @@ def new_product():
     name = request.form.get('name')
     category = request.form.get('category')
     price = float(request.form.get('price'))
+
     print("asin:",asin,"name:",name,"cat:",category,"price:",price)
 
     #display result status of inserting new product into db

@@ -34,7 +34,6 @@ else:
 class AmazonReviewsSpider(scrapy.Spider):
     # Spider name
     name = 'amazon_profiles'
-    custom_settings = {}
 
     custom_settings = configure_setting(app)
 

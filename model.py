@@ -25,6 +25,7 @@ class Setting(db.Model):
     output_filepath = db.Column(db.String)
     consolidated_filepath = db.Column(db.String)
     log_filepath = db.Column(db.String)
+    tracker_filepath = db.Column(db.String)
     no_of_pg_crawl = db.Column(db.Integer)
     no_of_retry = db.Column(db.Integer)
 

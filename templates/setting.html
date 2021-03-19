@@ -6,7 +6,7 @@
 
 {% block content %}
 
-<div class="col-md-6 offset-md-4" style="margin-top: 5%;">
+<div class="col-md-6 offset-md-4" style="margin-top: 2%;">
   <h1>Modify Webscrape Configuration</h1>
 
 <form method="POST" action="/webscrapeconfig">
@@ -90,6 +90,11 @@
     <div class="form-group">
       <label for="">Log file path</label>
       <input type="text" name="log_path" class="form-control" value ="{{log_path}}" required>
+    </div>
+
+    <div class="form-group">
+      <label for="">Tracker path</label>
+      <input type="text" name="tracker_path" class="form-control" value ="{{tracker_path}}" required>
     </div>
 
   <button type="submit" class="btn btn-primary" style="margin-top:2%">Submit</button>

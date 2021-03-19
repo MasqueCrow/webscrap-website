@@ -36,7 +36,6 @@ def login_post():
     print(email,password)
 
     user = User.query.filter_by(email=email).first()
-    print(user.password)
 
     #check if user actually exists
     #take the user-supplied password, hash it, and compare it to hashed password in database
