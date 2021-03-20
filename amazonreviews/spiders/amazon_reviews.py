@@ -33,8 +33,6 @@ class AmazonReviewsSpider(scrapy.Spider):
     # Spider name
     name = 'amazon_reviews'
 
-    
-
     def __init__(self, *args, **kwargs):
         super(AmazonReviewsSpider, self).__init__(*args, **kwargs)
 
@@ -43,8 +41,7 @@ class AmazonReviewsSpider(scrapy.Spider):
         mode = config[2]
         start_urls = []
         custom_settings = configure_setting(app)
-        # self.tracker_path = custom_settings['tracker_output'] + "reviews_tracker.json"
-        # sys.path.append(self.tracker_path)
+        self.tracker_path = custom_settings['tracker_output'] + "reviews_tracker.json"
 
         if mode == "outstanding":
             outstanding_df = pd.read_csv(self.log_output)
@@ -110,7 +107,7 @@ class AmazonReviewsSpider(scrapy.Spider):
         reached_old_reviews = False
 
         # identify which product reviews have been scraped before 
-        with open(webscrap_path+'/amazonreviews/output/tracker/reviews_tracker.json', 'r+') as reviews_file:
+        with open(webscrap_path+self.tracker_path, 'r+') as reviews_file:
             reviews_data = json.load(reviews_file)
             #print(reviews_data)
 
@@ -173,14 +170,14 @@ class AmazonReviewsSpider(scrapy.Spider):
                 elif next_page_partial_url and reached_old_reviews:
                     print("Reached the point of old reviews. Stop scraping for current product review")
                     reviews_data[ASIN] = date_scraped
-                    with open(webscrap_path+'/amazonreviews/output/tracker/reviews_tracker.json', 'w') as reviews_file:
+                    with open(webscrap_path+self.tracker_path, 'w') as reviews_file:
                         json.dump(reviews_data, reviews_file)
                     raise CloseSpider('termination condition met') 
 
                 else:
                     print("No more next review page button. Stop scraping for current product review")
                     reviews_data[ASIN] = date_scraped
-                    with open(webscrap_path+'/amazonreviews/output/tracker/reviews_tracker.json', 'w') as reviews_file:
+                    with open(webscrap_path+self.tracker_path, 'w') as reviews_file:
                         json.dump(reviews_data, reviews_file)
                     raise CloseSpider('termination condition met') 
             else:
@@ -250,13 +247,13 @@ class AmazonReviewsSpider(scrapy.Spider):
                     #print("loaded reviews data", reviews_data)
                     reviews_data[ASIN] = date_scraped
                     #print("updated reviews data", reviews_data)
-                    with open(webscrap_path+'/amazonreviews/output/tracker/reviews_tracker.json', 'w') as reviews_file:
+                    with open(webscrap_path+self.tracker_path, 'w') as reviews_file:
                         json.dump(reviews_data, reviews_file)
                     raise CloseSpider('termination condition met')              
                     
                 else:
                     print("No more next review page button. Stop scraping for current product review")
                     reviews_data[ASIN] = date_scraped
-                    with open(webscrap_path+'/amazonreviews/output/tracker/reviews_tracker.json', 'w') as reviews_file:
+                    with open(webscrap_path+self.tracker_path, 'w') as reviews_file:
                         json.dump(reviews_data, reviews_file)
                     raise CloseSpider('termination condition met')    
