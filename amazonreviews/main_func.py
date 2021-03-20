@@ -1,3 +1,4 @@
+import csv
 import glob
 import os
 from datetime import datetime
@@ -234,13 +235,14 @@ def get_profile_urls(config):
     profile_df = pd.DataFrame(profile_urls, columns=["url"])
     profile_df.to_csv(profiles_path, index=False)
 
-def upload_consolidated_csvs(svc_account_credential_file_path, project_name, target_dataset, args):
+def upload_consolidated_csvs(svc_account_credential_file_path, project_name, target_dataset, config):
     """
     This function uploads the consolidated scraped items into GBQ.
     Change credential file path / table names accordingly as needed
     """
     # project parameters
-    consolidated_dir = args.final_output
+    basepath = os.path.dirname(__file__)
+    consolidated_dir = os.path.join(basepath,config['con_path'])
 
     ## upload reviews
     reviews_file_path = consolidated_dir + ("/reviews/consolidated_reviews.csv")
@@ -277,13 +279,17 @@ def upload_consolidated_csvs(svc_account_credential_file_path, project_name, tar
     except FileNotFoundError:
         print(f"{profiles_file_path} does not exist")
 
-def clear_output_folders(args):
+def clear_output_folders(config):
     """
     This function helps to clear all the output folders of the csv files and then recreates the outstanding item files
     in the log folder with the headers - 'url', 'num_items' and 'scraped'
     """
+    basepath = os.path.dirname(__file__)
+    raw_output_path = os.path.join(basepath,config['output_path'])
+    output_path = raw_output_path.split("/raw")[0]
+    glob_exp = output_path + "/**/*.csv"
     # remove csv files in output folder and its sub-folders recursively
-    files = glob.glob('./output/**/*.csv', recursive=True)
+    files = glob.glob(glob_exp, recursive=True)
     for f in files:
         try:
             os.remove(f)
@@ -292,7 +298,7 @@ def clear_output_folders(args):
     print("csv files in output folder have been removed")
 
     # recreate csv files in log folder
-    file_path = args.log_output
+    file_path = os.path.join(basepath,config['log_path'])
     file_names = ['outstanding_reviews.csv','outstanding_profiles.csv','outstanding_products.csv']
     for fn in file_names:
         csv_name = file_path + fn
