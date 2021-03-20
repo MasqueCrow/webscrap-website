@@ -276,3 +276,28 @@ def upload_consolidated_csvs(svc_account_credential_file_path, project_name, tar
             print("There is no profiles in the consolidated file to be uploaded")
     except FileNotFoundError:
         print(f"{profiles_file_path} does not exist")
+
+def clear_output_folders(args):
+    """
+    This function helps to clear all the output folders of the csv files and then recreates the outstanding item files
+    in the log folder with the headers - 'url', 'num_items' and 'scraped'
+    """
+    # remove csv files in output folder and its sub-folders recursively
+    files = glob.glob('./output/**/*.csv', recursive=True)
+    for f in files:
+        try:
+            os.remove(f)
+        except OSError as e:
+            print("Error: %s : %s" % (f, e.strerror))
+    print("csv files in output folder have been removed")
+
+    # recreate csv files in log folder
+    file_path = args.log_output
+    file_names = ['outstanding_reviews.csv','outstanding_profiles.csv','outstanding_products.csv']
+    for fn in file_names:
+        csv_name = file_path + fn
+        with open(csv_name, 'w') as csvfile:
+            fieldnames = ['url', 'num_items', 'scraped']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+    print(f"log files with headers have been created in {file_path} folder")
