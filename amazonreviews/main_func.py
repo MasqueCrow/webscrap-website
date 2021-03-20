@@ -234,10 +234,9 @@ def get_profile_urls(config):
     profile_df = pd.DataFrame(profile_urls, columns=["url"])
     profile_df.to_csv(profiles_path, index=False)
 
-def upload_consolidated_csvs(svc_account_credential_file_path, project_name, target_dataset,args):
+def upload_consolidated_csvs(svc_account_credential_file_path, project_name, target_dataset, args):
     """
     This function uploads the consolidated scraped items into GBQ.
-
     Change credential file path / table names accordingly as needed
     """
     # project parameters
@@ -245,22 +244,35 @@ def upload_consolidated_csvs(svc_account_credential_file_path, project_name, tar
 
     ## upload reviews
     reviews_file_path = consolidated_dir + ("/reviews/consolidated_reviews.csv")
-    # upload if file > 1kb
-    if os.stat(reviews_file_path).st_size > 1000:
-        upload_csv_as_df(svc_account_credential_file_path, project_name, target_dataset, "reviews", reviews_file_path)
-    else:
-        print("There is no reviews in the consolidated file to be uploaded")
+    # add try-except logic in case consolidated file does not exist
+    try:
+        # upload if file > 1kb
+        if os.stat(reviews_file_path).st_size > 1000:
+            upload_csv_as_df(svc_account_credential_file_path, project_name, target_dataset, "reviews", reviews_file_path)
+        else:
+            print("There is no reviews in the consolidated file to be uploaded")
+    except FileNotFoundError:
+        print(f"{reviews_file_path} does not exist")
+
 
     ## upload products
     products_file_path = consolidated_dir + ("/products/consolidated_products.csv")
-    if os.stat(products_file_path).st_size > 1000:
-        upload_csv_as_df(svc_account_credential_file_path, project_name, target_dataset, "products", products_file_path)
-    else:
-        print("There is no products in the consolidated file to be uploaded")
+    # add try-except logic in case consolidated file does not exist
+    try:
+        if os.stat(products_file_path).st_size > 1000:
+            upload_csv_as_df(svc_account_credential_file_path, project_name, target_dataset, "products", products_file_path)
+        else:
+            print("There is no products in the consolidated file to be uploaded")
+    except FileNotFoundError:
+        print(f"{products_file_path} does not exist")
 
     ## upload profiles
     profiles_file_path = consolidated_dir + ("/profiles/consolidated_profiles.csv")
-    if os.stat(profiles_file_path).st_size > 1000:
-        upload_csv_as_df(svc_account_credential_file_path, project_name, target_dataset, "profiles", profiles_file_path)
-    else:
-        print("There is no profiles in the consolidated file to be uploaded")
+    # add try-except logic in case consolidated file does not exist
+    try:
+        if os.stat(profiles_file_path).st_size > 1000:
+            upload_csv_as_df(svc_account_credential_file_path, project_name, target_dataset, "profiles", profiles_file_path)
+        else:
+            print("There is no profiles in the consolidated file to be uploaded")
+    except FileNotFoundError:
+        print(f"{profiles_file_path} does not exist")
