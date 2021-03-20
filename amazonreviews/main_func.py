@@ -199,8 +199,7 @@ def create_urls(asins):
     review_file_path = os.path.join(basepath,'data','scrape_reviews.csv')
 
     product_urls = [f"https://www.amazon.com/dp/{asin}" for asin in asins]
-    review_urls = [
-        f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews" for asin in asins]
+    review_urls = [f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews&sortBy=recent" for asin in asins]
 
     product_df = pd.DataFrame(product_urls, columns=["url"])
     product_df.to_csv(product_file_path, index=False)
