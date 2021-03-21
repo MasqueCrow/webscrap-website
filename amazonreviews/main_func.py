@@ -182,7 +182,7 @@ def get_products(config):
             .format(s_row=start_row, e_row=end_row, time=datetime.now().strftime("%H%M%S"))
 
         cmd = 'scrapy runspider ' + basepath + '/spiders/amazon_products.py -o {output_path} '\
-              '-a config="{products_path}, {log_file},{s_row},{e_row},main"'\
+              '-a config="{products_path},{log_file},{s_row},{e_row},main"'\
             .format(output_path=output_path, log_file=log_output, products_path=products_path, s_row=start_row, e_row=end_row)
         call(cmd, shell=True)
 
