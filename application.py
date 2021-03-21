@@ -39,7 +39,8 @@ def make_celery(app):
 def create_app():
     app = Flask(__name__)
     with app.app_context():
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
+        #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///mnt/c/users/ryan/work_ryan/y4s1/fyp/webscrap-website/loreal_db.sqlite3'
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         app.secret_key = os.urandom(24)
 
@@ -47,7 +48,6 @@ def create_app():
         app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
         app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
         app.config['CELERY_CREATE_MISSING_QUEUES'] = True
-
 
         db.init_app(app)
         migrate.init_app(app,db)
@@ -247,6 +247,14 @@ def get_product(config,com_product_output_path, com_product_con_path):
     global product_status
     product_status = True
 
+# @celery.task()
+# def upload_items_and_clean_output_folder(config):
+#     cwd = os.getcwd()
+#     #change secret key path based on where you store it
+#     secret_key_path = os.path.join(cwd,'credential_file.json')
+#     m.upload_consolidated_csvs(secret_key_path, 'crafty-chiller-276910', 'scraped_items_test', config)
+#     m.clear_output_folders(config)
+
 review_url_count = 0
 profile_url_count = 0
 product_url_count = 0
@@ -343,11 +351,26 @@ def webscrapestatus():
     global profile_url_count
     global product_url_count
 
+    review_status = True
+    profile_status = True
+    product_status = True
+
     msg = "Webscrape tool has been successfully activated. It might take a while before web crawling is completed. Please check back again later."
     complete_msg = ""
+    config = {
+    "con_path": "output/consolidated",
+    "output_path": "output/raw",
+    "log_path": "output/logs/"
+    }
 
     if review_status and profile_status and product_status:
         complete_msg = "Web scraping has been completed."
+        #invoke upload consolidated csvs and recreate output folder task after queue 1 and queue2
+        cwd = os.getcwd()
+        #change secret key path based on where you store it
+        secret_key_path = os.path.join(cwd,'credential_file.json')
+        m.upload_consolidated_csvs(secret_key_path, 'crafty-chiller-276910', 'scraped_items_test', config)
+        m.clear_output_folders(config)
 
 
     return render_template("webscrape_progress.html",name=current_user.name,
