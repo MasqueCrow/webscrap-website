@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 from subprocess import call
 
-#from amazonreviews.gcpFunctions import create_bq_client, upload_csv_as_df
+from amazonreviews.gcpFunctions import create_bq_client, upload_csv_as_df
 from amazonreviews.stitch import combine_products, combine_profiles, combine_reviews
 
 import configargparse
@@ -157,11 +157,11 @@ def get_profiles(config):
         output_path = output_dir + '/profiles_{time}_{s_row}_{e_row}.csv'\
             .format(s_row=start_row, e_row=end_row, time=datetime.now().strftime("%H%M%S"))
 
-        cmd = 'scrapy runspider '+basepath+'/spiders/amazon_profiles.py -o {output_path} '\
+        cmd = 'scrapy runspider ' + basepath + '/spiders/amazon_profiles.py -o {output_path} '\
               '-a config="{profiles_path},{log_file},{s_row},{e_row},main"' \
             .format(output_path=output_path, profiles_path=profiles_path, log_file=log_output, s_row=start_row, e_row=end_row, time=datetime.now().strftime("%H%M%S"))
         call(cmd, shell=True)
-
+        
 
 def get_products(config):
     """
