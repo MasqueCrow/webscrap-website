@@ -2,6 +2,7 @@ from flask_login import login_required, current_user
 from flask import Flask, render_template,request, jsonify
 from amazonreviews import main_func as m
 
+from datetime import datetime
 import time
 import os
 
@@ -181,6 +182,32 @@ def webscrape():
 def clear_file(filename):
     open('crawl_progress/'+filename,'w').close()
 
+# Update counter of web scrape tool each time it is activated (queue 1 with get_review_profile)
+def update_counter_file():
+    # get current date
+    current_date = datetime.today().strftime('%Y-%m-%d')
+
+    # load json counter file to read/write to
+    with open('webscrape_counter.json', 'r+') as infile:
+        # load current file unless it is empty which causes the jsondecode error
+        try:
+            current_counts = json.load(infile)
+            print("JSON WEBSCRAPE COUNTER FILE LOADED SUCCESSFULLY", current_counts)
+            if current_date in current_counts:
+                current_counts[f'{current_date}'] += 1
+            else:
+                current_counts[f'{current_date}'] = 1
+        except ValueError: #catches json decode error
+            # initialize the first time when the json counter file is empty
+            print("JSON WEBSCRAPE COUNTER FILE NOT LOADED DUE TO VALUE ERROR")
+            current_counts = {}
+            current_counts[f'{current_date}'] = 1
+        with open('webscrape_counter.json', 'w') as outfile:
+            # write updated count to counter file
+            json.dump(current_counts, outfile)
+            infile.close()
+            outfile.close()
+
 def update_product_scrapetime():
     from datetime import datetime
     from model import Product
@@ -212,6 +239,7 @@ product_status = False
 def get_review_profile(config,com_review_output_path,com_review_con_path,com_profile_output_path, com_profile_con_path):
     clear_file('review.txt')
     clear_file('profile.txt')
+    update_counter_file()
 
     m.get_reviews(config)
     m.get_outstanding_reviews(config)
