@@ -2,6 +2,7 @@ from flask_login import login_required, current_user
 from flask import Flask, render_template,request, jsonify
 from amazonreviews import main_func as m
 
+from datetime import datetime
 import time
 import os
 
@@ -40,7 +41,8 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = 'need to set os env variable for value'
     with app.app_context():
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
+        #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///mnt/c/users/ryan/work_ryan/y4s1/fyp/webscrap-website/loreal_db.sqlite3'
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         app.secret_key = os.urandom(24)
 
@@ -182,6 +184,32 @@ def webscrape():
 def clear_file(filepath,filename):
     open(filepath+filename,'w').close()
 
+# Update counter of web scrape tool each time it is activated (queue 1 with get_review_profile)
+def update_counter_file():
+    # get current date
+    current_date = datetime.today().strftime('%Y-%m-%d')
+
+    # load json counter file to read/write to
+    with open('webscrape_counter.json', 'r+') as infile:
+        # load current file unless it is empty which causes the jsondecode error
+        try:
+            current_counts = json.load(infile)
+            print("JSON WEBSCRAPE COUNTER FILE LOADED SUCCESSFULLY", current_counts)
+            if current_date in current_counts:
+                current_counts[f'{current_date}'] += 1
+            else:
+                current_counts[f'{current_date}'] = 1
+        except ValueError: #catches json decode error
+            # initialize the first time when the json counter file is empty
+            print("JSON WEBSCRAPE COUNTER FILE NOT LOADED DUE TO VALUE ERROR")
+            current_counts = {}
+            current_counts[f'{current_date}'] = 1
+        with open('webscrape_counter.json', 'w') as outfile:
+            # write updated count to counter file
+            json.dump(current_counts, outfile)
+            infile.close()
+            outfile.close()
+
 def update_product_scrapetime():
     from datetime import datetime
     from model import Product
@@ -214,6 +242,7 @@ def update_status(task):
 def get_review_profile(config,com_review_output_path,com_review_con_path,com_profile_output_path, com_profile_con_path):
     clear_file('./crawl_progress/','review.txt')
     clear_file('./crawl_progress/','profile.txt')
+    update_counter_file()
 
     m.get_reviews(config)
     m.get_outstanding_reviews(config)
@@ -245,6 +274,14 @@ def get_product(config,com_product_output_path, com_product_con_path):
 
     #Update product status when crawling has been completed
     update_status('product')
+
+# @celery.task()
+# def upload_items_and_clean_output_folder(config):
+#     cwd = os.getcwd()
+#     #change secret key path based on where you store it
+#     secret_key_path = os.path.join(cwd,'credential_file.json')
+#     m.upload_consolidated_csvs(secret_key_path, 'crafty-chiller-276910', 'scraped_items_test', config)
+#     m.clear_output_folders(config)
 
 review_url_count = 0
 profile_url_count = 0
@@ -343,11 +380,22 @@ def webscrapestatus():
 
     msg = "Webscrape tool has been successfully activated. It might take a while before web crawling is completed. Please check back again later."
     complete_msg = ""
+    config = {
+    "con_path": "output/consolidated",
+    "output_path": "output/raw",
+    "log_path": "output/logs/"
+    }
 
     result = status_result()
 
     if len(result) == 3:
         complete_msg = "Web scraping has been completed."
+        #invoke upload consolidated csvs and recreate output folder task after queue 1 and queue2
+        cwd = os.getcwd()
+        #change secret key path based on where you store it
+        secret_key_path = os.path.join(cwd,'credential_file.json')
+        m.upload_consolidated_csvs(secret_key_path, 'crafty-chiller-276910', 'scraped_items_test', config)
+        m.clear_output_folders(config)
 
     print("check status:",result)
 

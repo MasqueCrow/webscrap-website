@@ -1,9 +1,10 @@
+import csv
 import glob
 import os
 from datetime import datetime
 from subprocess import call
 
-#from amazonreviews.gcpFunctions import create_bq_client, upload_csv_as_df
+from amazonreviews.gcpFunctions import create_bq_client, upload_csv_as_df
 from amazonreviews.stitch import combine_products, combine_profiles, combine_reviews
 
 import configargparse
@@ -156,11 +157,11 @@ def get_profiles(config):
         output_path = output_dir + '/profiles_{time}_{s_row}_{e_row}.csv'\
             .format(s_row=start_row, e_row=end_row, time=datetime.now().strftime("%H%M%S"))
 
-        cmd = 'scrapy runspider '+basepath+'/spiders/amazon_profiles.py -o {output_path} '\
+        cmd = 'scrapy runspider ' + basepath + '/spiders/amazon_profiles.py -o {output_path} '\
               '-a config="{profiles_path},{log_file},{s_row},{e_row},main"' \
             .format(output_path=output_path, profiles_path=profiles_path, log_file=log_output, s_row=start_row, e_row=end_row, time=datetime.now().strftime("%H%M%S"))
         call(cmd, shell=True)
-
+        
 
 def get_products(config):
     """
@@ -181,7 +182,7 @@ def get_products(config):
             .format(s_row=start_row, e_row=end_row, time=datetime.now().strftime("%H%M%S"))
 
         cmd = 'scrapy runspider ' + basepath + '/spiders/amazon_products.py -o {output_path} '\
-              '-a config="{products_path}, {log_file},{s_row},{e_row},main"'\
+              '-a config="{products_path},{log_file},{s_row},{e_row},main"'\
             .format(output_path=output_path, log_file=log_output, products_path=products_path, s_row=start_row, e_row=end_row)
         call(cmd, shell=True)
 
@@ -199,8 +200,7 @@ def create_urls(asins):
     review_file_path = os.path.join(basepath,'data','scrape_reviews.csv')
 
     product_urls = [f"https://www.amazon.com/dp/{asin}" for asin in asins]
-    review_urls = [
-        f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews" for asin in asins]
+    review_urls = [f"https://www.amazon.com/product-reviews/{asin}/ref=cm_cr_dp_d_show_all_btm?ie=UTF8&reviewerType=all_reviews&sortBy=recent" for asin in asins]
 
     product_df = pd.DataFrame(product_urls, columns=["url"])
     product_df.to_csv(product_file_path, index=False)
@@ -235,33 +235,75 @@ def get_profile_urls(config):
     profile_df = pd.DataFrame(profile_urls, columns=["url"])
     profile_df.to_csv(profiles_path, index=False)
 
-def upload_consolidated_csvs(svc_account_credential_file_path, project_name, target_dataset,args):
+def upload_consolidated_csvs(svc_account_credential_file_path, project_name, target_dataset, config):
     """
     This function uploads the consolidated scraped items into GBQ.
-
     Change credential file path / table names accordingly as needed
     """
     # project parameters
-    consolidated_dir = args.final_output
+    basepath = os.path.dirname(__file__)
+    consolidated_dir = os.path.join(basepath,config['con_path'])
 
     ## upload reviews
     reviews_file_path = consolidated_dir + ("/reviews/consolidated_reviews.csv")
-    # upload if file > 1kb
-    if os.stat(reviews_file_path).st_size > 1000:
-        upload_csv_as_df(svc_account_credential_file_path, project_name, target_dataset, "reviews", reviews_file_path)
-    else:
-        print("There is no reviews in the consolidated file to be uploaded")
+    # add try-except logic in case consolidated file does not exist
+    try:
+        # upload if file > 1kb
+        if os.stat(reviews_file_path).st_size > 1000:
+            upload_csv_as_df(svc_account_credential_file_path, project_name, target_dataset, "reviews", reviews_file_path)
+        else:
+            print("There is no reviews in the consolidated file to be uploaded")
+    except FileNotFoundError:
+        print(f"{reviews_file_path} does not exist")
+
 
     ## upload products
     products_file_path = consolidated_dir + ("/products/consolidated_products.csv")
-    if os.stat(products_file_path).st_size > 1000:
-        upload_csv_as_df(svc_account_credential_file_path, project_name, target_dataset, "products", products_file_path)
-    else:
-        print("There is no products in the consolidated file to be uploaded")
+    # add try-except logic in case consolidated file does not exist
+    try:
+        if os.stat(products_file_path).st_size > 1000:
+            upload_csv_as_df(svc_account_credential_file_path, project_name, target_dataset, "products", products_file_path)
+        else:
+            print("There is no products in the consolidated file to be uploaded")
+    except FileNotFoundError:
+        print(f"{products_file_path} does not exist")
 
     ## upload profiles
     profiles_file_path = consolidated_dir + ("/profiles/consolidated_profiles.csv")
-    if os.stat(profiles_file_path).st_size > 1000:
-        upload_csv_as_df(svc_account_credential_file_path, project_name, target_dataset, "profiles", profiles_file_path)
-    else:
-        print("There is no profiles in the consolidated file to be uploaded")
+    # add try-except logic in case consolidated file does not exist
+    try:
+        if os.stat(profiles_file_path).st_size > 1000:
+            upload_csv_as_df(svc_account_credential_file_path, project_name, target_dataset, "profiles", profiles_file_path)
+        else:
+            print("There is no profiles in the consolidated file to be uploaded")
+    except FileNotFoundError:
+        print(f"{profiles_file_path} does not exist")
+
+def clear_output_folders(config):
+    """
+    This function helps to clear all the output folders of the csv files and then recreates the outstanding item files
+    in the log folder with the headers - 'url', 'num_items' and 'scraped'
+    """
+    basepath = os.path.dirname(__file__)
+    raw_output_path = os.path.join(basepath,config['output_path'])
+    output_path = raw_output_path.split("/raw")[0]
+    glob_exp = output_path + "/**/*.csv"
+    # remove csv files in output folder and its sub-folders recursively
+    files = glob.glob(glob_exp, recursive=True)
+    for f in files:
+        try:
+            os.remove(f)
+        except OSError as e:
+            print("Error: %s : %s" % (f, e.strerror))
+    print("csv files in output folder have been removed")
+
+    # recreate csv files in log folder
+    file_path = os.path.join(basepath,config['log_path'])
+    file_names = ['outstanding_reviews.csv','outstanding_profiles.csv','outstanding_products.csv']
+    for fn in file_names:
+        csv_name = file_path + fn
+        with open(csv_name, 'w') as csvfile:
+            fieldnames = ['url', 'num_items', 'scraped']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+    print(f"log files with headers have been created in {file_path} folder")
