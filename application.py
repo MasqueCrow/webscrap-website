@@ -38,6 +38,7 @@ def make_celery(app):
 
 def create_app():
     app = Flask(__name__)
+    app.secret_key = 'need to set os env variable for value'
     with app.app_context():
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -47,7 +48,6 @@ def create_app():
         app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379/0'
         app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379/0'
         app.config['CELERY_CREATE_MISSING_QUEUES'] = True
-
 
         db.init_app(app)
         migrate.init_app(app,db)
@@ -115,6 +115,7 @@ def query_reviews():
     import matplotlib.pyplot as plt
     import numpy as np
 
+
     project = 'crafty-chiller-276910'
     cwd = os.getcwd()
     #change secret key path based on where you store it
@@ -152,12 +153,12 @@ def query_reviews():
     result = ' '.join(resultwords)
 
     #Generate Review wordcloud
-    alice_mask = np.array(Image.open(os.join(cwd,'static/img/alice3.jpg')))
+    alice_mask = np.array(Image.open(cwd +'/static/img/alice3.jpg'))
 
     wordcloud = WordCloud(background_color='white',
                       mask=alice_mask,contour_width=1.5, contour_color='steelblue').generate(result)
 
-    image_output_path = os.path.join(cwd,'static/img/alice.jpg')
+    image_output_path = cwd +'/static/img/alice.jpg'
     wordcloud.to_file(image_output_path)
     print("Time taken to generate wordcloud:",time.time() - start)
 
@@ -178,8 +179,8 @@ def webscrape():
     return render_template("webscrape.html",name=current_user.name,products=products)
 
 #Clear content of counter file at the beginning of running webscrape tool
-def clear_file(filename):
-    open('crawl_progress/'+filename,'w').close()
+def clear_file(filepath,filename):
+    open(filepath+filename,'w').close()
 
 def update_product_scrapetime():
     from datetime import datetime
@@ -203,23 +204,23 @@ def update_product_scrapetime():
         db.session.commit()
         print("product:",product,"time:",product.last_scraped )
 
-#initalise webcrawling variable status
-review_status = False
-profile_status = False
-product_status = False
+
+#update scrape task to be true when celery task has been completed
+def update_status(task):
+    with open('./crawl_progress/status.txt','a') as f:
+        f.write(task + ",")
 
 @celery.task()
 def get_review_profile(config,com_review_output_path,com_review_con_path,com_profile_output_path, com_profile_con_path):
-    clear_file('review.txt')
-    clear_file('profile.txt')
+    clear_file('./crawl_progress/','review.txt')
+    clear_file('./crawl_progress/','profile.txt')
 
     m.get_reviews(config)
     m.get_outstanding_reviews(config)
     m.combine_reviews(com_review_output_path, com_review_con_path)
 
     #Update review status when crawling has been completed
-    global review_status
-    review_status = True
+    update_status('review')
 
     #update datetime of products that have been scraped
     update_product_scrapetime()
@@ -233,19 +234,17 @@ def get_review_profile(config,com_review_output_path,com_review_con_path,com_pro
     m.combine_profiles(com_profile_output_path, com_profile_con_path)
 
     #Update profile status when crawling has been completed
-    global profile_status
-    profile_status = True
+    update_status('profile')
 
 @celery.task()
 def get_product(config,com_product_output_path, com_product_con_path):
-    clear_file('product.txt')
+    clear_file('./crawl_progress/','product.txt')
     m.get_products(config)
     m.get_outstanding_products(config)
     m.combine_products(com_product_output_path, com_product_con_path)
 
     #Update product status when crawling has been completed
-    global product_status
-    product_status = True
+    update_status('product')
 
 review_url_count = 0
 profile_url_count = 0
@@ -275,8 +274,6 @@ def scrape_product():
         'log_path': log_path
     }
 
-
-
     #Retrieve ASIN from selected products and stored it in a list
     asin_list = []
     if request.method == "POST":
@@ -289,7 +286,6 @@ def scrape_product():
             asin_list.append(asin)
 
     from model import Product
-
 
     # create urls to scrape reviews and products from a csv containing product ASINs
     m.create_urls(asin_list)
@@ -309,6 +305,9 @@ def scrape_product():
     com_profile_output_path = os.path.join(combined_output_basepath, 'profiles')
     com_profile_con_path = os.path.join(combined_con_basepath,'profiles')
 
+    #clear status in status file which checks for celery task completion
+    clear_file('./crawl_progress/','status.txt')
+
     #invoke review and profile celery task (reviews ->profile)
     get_review_profile.apply_async(queue='queue1',args=(config,com_review_output_path,com_review_con_path,com_profile_output_path, com_profile_con_path))
 
@@ -321,34 +320,36 @@ def scrape_product():
 
     msg = "Webscrape tool has been successfully activated. It might take a while before web crawling is completed. Please check back again later."
 
-    #return jsonify({'var1': review_url_count , 'var2': 2, 'var3': 3 })
     return render_template("webscrape_progress.html",name=current_user.name,msg=msg,review_url_count = review_url_count,profile_url_count=profile_url_count,product_url_count=product_url_count)
 
-
-def check_crawled_url():
-    global review_url_count
-    global profile_url_count
-    global product_url_count
-
-    review_url_count = sum(1 for line in open('crawl_progress/review.txt'))
-    profile_url_count = sum(1 for line in open('crawl_progress/profile.txt'))
-    product_url_count = sum(1 for line in open('crawl_progress/product.txt'))
+def status_result():
+    f = open('./crawl_progress/status.txt','r')
+    result = f.read()
+    result = result[:-1].split(",")
+    return result
 
 @app.route('/webscrapestatus',methods=['GET','POST'])
 @login_required
 def webscrapestatus():
-    check_crawled_url()
 
     global review_url_count
     global profile_url_count
     global product_url_count
 
+    review_url_count = sum(1 for line in open('./crawl_progress/review.txt'))
+    profile_url_count = sum(1 for line in open('./crawl_progress/profile.txt'))
+    product_url_count = sum(1 for line in open('./crawl_progress/product.txt'))
+
+
     msg = "Webscrape tool has been successfully activated. It might take a while before web crawling is completed. Please check back again later."
     complete_msg = ""
 
-    if review_status and profile_status and product_status:
+    result = status_result()
+
+    if len(result) == 3:
         complete_msg = "Web scraping has been completed."
 
+    print("check status:",result)
 
     return render_template("webscrape_progress.html",name=current_user.name,
                            review_url_count = review_url_count,
