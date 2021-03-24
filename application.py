@@ -41,8 +41,8 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = 'need to set os env variable for value'
     with app.app_context():
-        #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///mnt/c/users/ryan/work_ryan/y4s1/fyp/webscrap-website/loreal_db.sqlite3'
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
+        #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///mnt/c/users/ryan/work_ryan/y4s1/fyp/webscrap-website/loreal_db.sqlite3'
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         app.secret_key = os.urandom(24)
 
@@ -170,7 +170,14 @@ def index():
     #create link to navigate back to  webscrape status
     query_reviews.apply_async(queue='queue3')
 
-    return render_template("dashboard.html",name=current_user.name,url ='/static/img/alice.jpg')
+    #Read time-series graph values
+    f = open('webscrape_counter.json', 'r+')
+    webscrape_data = json.load(f)
+
+    #stringify json value
+    webscrape_data = json.dumps(webscrape_data)
+
+    return render_template("dashboard.html",name=current_user.name,url ='/static/img/alice.jpg',webscrape_data=webscrape_data)
 
 
 @app.route('/webscrape')
