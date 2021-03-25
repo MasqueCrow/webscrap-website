@@ -128,7 +128,7 @@ class AmazonReviewsSpider(scrapy.Spider):
             ASIN = response.request.url.split('/')[4]
 
             #append ASIN to file for counter
-            with open(webscrap_path+'/crawl_progress/profile.txt','a') as asin:
+            with open(webscrap_path+'/crawl_progress/product.txt','a') as asin:
                 asin.write(ASIN + '\n')
 
         # Combining the results
