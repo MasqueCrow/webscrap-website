@@ -41,8 +41,8 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = 'need to set os env variable for value'
     with app.app_context():
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
-        #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///mnt/c/users/ryan/work_ryan/y4s1/fyp/webscrap-website/loreal_db.sqlite3'
+        #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///mnt/c/users/ryan/work_ryan/y4s1/fyp/webscrap-website/loreal_db.sqlite3'
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         app.secret_key = os.urandom(24)
 
@@ -253,6 +253,7 @@ def get_review_profile(config,com_review_output_path,com_review_con_path,com_pro
 
     m.get_reviews(config)
     m.get_outstanding_reviews(config)
+    m.update_outstanding_reviews(config)
     m.combine_reviews(com_review_output_path, com_review_con_path)
 
     #Update review status when crawling has been completed
@@ -267,6 +268,7 @@ def get_review_profile(config,com_review_output_path,com_review_con_path,com_pro
     # Scrape profiles
     m.get_profiles(config)
     m.get_outstanding_profiles(config)
+    m.update_outstanding_profiles(config)
     m.combine_profiles(com_profile_output_path, com_profile_con_path)
 
     #Update profile status when crawling has been completed
@@ -277,6 +279,7 @@ def get_product(config,com_product_output_path, com_product_con_path):
     clear_file('./crawl_progress/','product.txt')
     m.get_products(config)
     m.get_outstanding_products(config)
+    m.update_outstanding_products(config)
     m.combine_products(com_product_output_path, com_product_con_path)
 
     #Update product status when crawling has been completed
