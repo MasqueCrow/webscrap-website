@@ -1,7 +1,3 @@
-//code snippet to get value from Jinja template
-//var graphValue = document.getElementById('graphValue').getAttribute('data-value');
-//console.log(graphValue);
-
 var ctx = document.getElementById('doughChart').getContext('2d');
 data = {
     datasets: [{
@@ -32,12 +28,11 @@ var myDoughnutChart = new Chart(ctx, {
     options: {
       title: {
           display: true,
-          text: 'Outstanding Items to Scrape',
           fontSize: 20,
           fontStyle: 'normal'
       },
-        maintainAspectRatio: false,
-        responsive: false,
+        maintainAspectRatio: true,
+        responsive: true,
         plugins: {
           labels: [
             {

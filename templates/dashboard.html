@@ -1,24 +1,55 @@
 <meta id="my-data" data-name="{{name}}" data-other="{{other}}">
+<style>
+  .offset-md-5{
+    margin-left:86.3% !important;
+  }
+  .offset-md-2{
+    margin-left:19% !important;
+  }
+  .offset-md-1{
+    margin-left:2.33% !important;
+  }
+  .col-md-n{
+    width:33% !important;
+  }
+  .col-md-x{
+    width:41.5% !important;
+  }
+  .card-title{
+    color:#6c757d;
+    text-align:center;
+  }
+</style>
+
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="col-md-2 offset-md-9" style="margin-top:1%;">
-  <a id="statusBtn" href="http://127.0.0.1:5000/webscrapestatus" type="button"  class="btn btn-info"  style="text-align:center;text-decoration:none;">Return to Scrape Status</a>
+<div class="col-md-4 offset-md-5" style="margin-top:1.3%;margin-bottom:1%;">
+  <a id="statusBtn" href="http://127.0.0.1:5000/webscrapestatus" type="button"  class="btn btn-info"  style="text-align:center;text-decoration:none;">Scrape Result</a>
 </div>
 
-<div id="myTS" style="margin-top:0.6%;" class="col-md-6 offset-md-2" ></div>
-<div class="col-md-3" style="margin-top:2%;">
+<div class="shadow card col-md-5 offset-md-2" style="padding-left:0px;padding-right:0px;">
+  <h5 class="card-header card-title">
+    Webscrape Activity Timeline
+  </h5>
+  <div id="myTS">
+  </div>
+</div>
+
+<div class="shadow card col-md-n offset-md-1" style="padding-left:0px;padding-right:0px;">
+  <h5 class="card-header card-title">Outstanding Items to Scrape</h5>
   <canvas id="doughChart"style="width:340px;height:340px"></canvas>
 </div >
 
-<div class="col-md-6 offset-md-1" style="margin-top:1%;">
-  <div style="color:#6c757d;font-size:20px;margin-left:40%;margin-top:1%;">Products Reviews Wordcloud</div>
-  <img src={{url}} alt="Chart" height="600" style="display:block;margin-left:35%;" />
+<div class="shadow card col-md-4 offset-md-2" style="margin-top:1%;margin-bottom:1%;padding-left:0px;padding-right:0px;">
+  <h5 class="card-header card-title" >Products Reviews Wordcloud</h5>
+  <img src={{url}} alt="Chart" height="600" style="display:block;" />
 </div>
 
-<div class="col-md-3" style="margin-top:1%;">
-  <canvas id="barChart"style="height:250px;"></canvas>
-  <canvas id="barChart2"style="height:250px;"></canvas>
+<div class="shadow card col-md-x offset-md-1" style="margin-top:1%;margin-bottom:1%;padding-left:0px;padding-right:0px;">
+  <h5 class="card-header card-title">Review Overview</h5>
+  <canvas id="barChart"style="height:33%;"></canvas>
+  <canvas id="barChart2"style="height:33%;margin-top:3%;"></canvas>
 </div>
 
 <input id="graphValue" type="hidden" value="{{webscrape_data}}" >
