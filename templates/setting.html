@@ -7,12 +7,11 @@
 {% block content %}
 
 <div class="col-md-6 offset-md-4" style="margin-top: 2%;">
-  <h1>Modify Webscrape Configuration</h1>
-
 <form method="POST" action="/webscrapeconfig">
-    <h3>Scrapy Settings</h3>
+    <h3 style="color:#6c757d;">Scrapy Setting</h3>
     <div class="form-group">
-      <label for="name">Enable Rotating Proxy </label>
+      <label for="name">Enable Rotating Proxy </label><br/>
+      <small class="form-text text-muted">With this setting enabled, a new unique IP address will be assigned for every connection to web scraping website</small>
       {% if rotate_proxy == True %}
       <select class="form-control" name="rotate_proxy">
         <option selected="selected" value='True'>True</option>
@@ -27,73 +26,91 @@
       {% endif %}
     </div>
 
-    <br/>
 
     <div class="form-group">
       <label for="name">Fetch Proxies</label>
+      <br/>
+      <small class="form-text text-muted">Specify number of proxies to fetch to allow establishing of new connections to web scraping website</small>
       <input name="fetch_proxies" type="number" step="" class="form-control dropdown-size" value ="{{fetch_proxies}}" required>
     </div>
 
     <div class="form-group">
       <label for="name">No. of Rotating Proxy Retry</label>
+      <br/>
+      <small class="form-text text-muted">Specify number of rotating proxy retry to website before moving on to next url</small>
       <input name="rotating_proxy_page_retry" type="number" step="" class="form-control dropdown-size" value ="{{rotating_proxy_page_retry}}" required>
     </div>
 
     <div class="form-group">
       <label for="name">Retry Times</label>
+      <br/>
+      <small class="form-text text-muted">Specify number of retry for scraping outstanding items</small>
       <input name="no_of_retry" type="number" step="" class="form-control dropdown-size" value ="{{no_of_retry}}" required>
   </div>
 
   <div class="form-group">
     <label for="name">Concurrent request</label>
+    <br/>
+    <small class="form-text text-muted">Configure maximum concurrent requests performed by Scrapy (default: 16)</small>
     <input name="no_of_concurrent_request" type="number" step="" class="form-control dropdown-size" value ="{{no_of_concurrent_request}}" required>
   </div>
 
   <div class="form-group">
     <label for="name">Download Delay</label>
+    <br/>
+    <small class="form-text text-muted">Configure a delay for requests for the same website (default: 0)</small>
     <input name="download_delay" type="number" step="" class="form-control dropdown-size" value ="{{download_delay}}" required>
   </div>
 
   <div class="form-group">
     <label for="name">Download Timeout</label>
+    <br/>
+    <small class="form-text text-muted">Set time limit for each download</small>
     <input name="download_timeout" type="number" step="" class="form-control dropdown-size" value ="{{download_timeout}}" required>
   </div>
 
   <div class="form-group">
     <label for="pages_crawl">No. of pages to crawl</label>
+    <br/>
+    <small class="form-text text-muted">Set maximum no. of pages to crawl for each url</small>
     <input name="no_of_pg_crawl" type="number" step="" class="form-control dropdown-size" value ="{{no_of_pg_crawl}}" required>
   </div>
 
-    <div class="form-group">
-      <label for="retry">No. of retry</label>
-      <input name="no_of_retry" type="number" step="" class="form-control dropdown-size" value ="{{no_of_retry}}" required>
-    </div>
-
   <br/>
-  <h3>File Directory Settings</h3>
+  <h3 style="color:#6c757d;">File Directory Setting</h3>
 
   <div class="form-group">
     <label for="name">Input file path</label>
+    <br/>
+    <small class="form-text text-muted">Input directory for scrapy tool to retrieve input data to perform web scraping</small>
     <input type="text" name="input_path" class="form-control" value ="{{input_path}}" required>
   </div>
 
   <div class="form-group">
     <label for="name">Output file path</label>
+    <br/>
+    <small class="form-text text-muted">Output directory for scraped items</small>
     <input type="text" name="output_path" class="form-control" value ="{{output_path}}" required>
   </div>
 
     <div class="form-group">
       <label for="">Consolidated file path</label>
+      <br/>
+      <small class="form-text text-muted">Output directory of combined scraped items</small>
       <input type="text" name="con_path" class="form-control" value ="{{con_path}}" required>
     </div>
 
     <div class="form-group">
       <label for="">Log file path</label>
+      <br/>
+      <small class="form-text text-muted">Output directory for log files</small>
       <input type="text" name="log_path" class="form-control" value ="{{log_path}}" required>
     </div>
 
     <div class="form-group">
       <label for="">Tracker path</label>
+      <br/>
+      <small class="form-text text-muted">Tracker directory to log date of scraped review</small>
       <input type="text" name="tracker_path" class="form-control" value ="{{tracker_path}}" required>
     </div>
 
