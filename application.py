@@ -12,6 +12,7 @@ import threading
 from extensions import db
 from extensions import migrate
 from extensions import login_manager
+from google.cloud import bigquery
 
 from auth import auth as auth_blueprint
 from model import model as model_blueprint
@@ -111,7 +112,6 @@ def check_non_empty_space_in_val(input):
 
 @celery.task()
 def query_reviews():
-    from google.cloud import bigquery
     from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
     from PIL import Image
     import matplotlib.pyplot as plt
@@ -163,6 +163,62 @@ def query_reviews():
     image_output_path = cwd +'/static/img/alice.jpg'
     wordcloud.to_file(image_output_path)
     print("Time taken to generate wordcloud:",time.time() - start)
+
+@celery.task()
+def query_reviews_contributors():
+    cwd = os.getcwd()
+    #change secret key path based on where you store it
+    secret_key_path = os.path.join(cwd,'credential_file.json')
+
+    #initialize bq client
+    client = bigquery.Client.from_service_account_json(secret_key_path)
+
+    query = '''
+        SELECT profile_name,count(*) as number_of_reviews FROM `crafty-chiller-276910.cleaned_items.reviews`
+        where profile_name != "Amazon Customer" AND profile_name != "Kindle Customer" 
+        group by profile_name
+        order by number_of_reviews desc
+        Limit 10
+            '''
+    # get df with query result
+    df = client.query(query).to_dataframe()
+
+    #Write dataframe into JSON file
+    df.to_json("top_review_contributors.json", orient='records')
+    print("Successfully written 'top_review_contributors.json' file")
+
+@celery.task()
+def query_review_numbers():
+    cwd = os.getcwd()
+    #change secret key path based on where you store it
+    secret_key_path = os.path.join(cwd,'credential_file.json')
+
+    #initialize bq client
+    client = bigquery.Client.from_service_account_json(secret_key_path)
+    #open product mapping file
+    file_path = os.path.join(cwd,'product_mapping.json')
+
+    query = '''
+        SELECT ASIN,count(*) as number_of_reviews FROM `crafty-chiller-276910.cleaned_items.reviews`
+        group by ASIN
+        order by number_of_reviews desc
+        LIMIT 10
+            '''
+
+    # get df with query result
+    df = client.query(query).to_dataframe()
+    
+    # replace ASIN with product names (for top few items)
+    with open(file_path, "r") as file:
+        mapping = json.load(file)
+        for value in df['ASIN']:
+            if value in mapping:
+                df['ASIN'] = df['ASIN'].replace([value],mapping[value])
+
+    #Write dataframe into JSON file
+    df.to_json("products_with_most_reviews.json", orient='records')
+    print("Successfully written 'products_with_most_reviews.json' file")
+
 
 @app.route('/dashboard')
 @login_required
@@ -397,6 +453,10 @@ def webscrapestatus():
     }
 
     result = status_result()
+
+    query_reviews_contributors()
+    query_review_numbers()
+    
 
     if len(result) == 3:
         complete_msg = "Web scraping has been completed."
