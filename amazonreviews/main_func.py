@@ -1,5 +1,6 @@
 import csv
 import glob
+import json
 import os
 from datetime import datetime
 from subprocess import call
@@ -307,3 +308,54 @@ def clear_output_folders(config):
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
     print(f"log files with headers have been created in {file_path} folder")
+
+def update_outstanding_reviews(config):
+    basepath = os.path.dirname(__file__)
+    log_output = os.path.join(basepath,config['log_path'],'outstanding_reviews.csv')
+    log_counter = os.path.join(basepath,config['log_path'], "outstanding_items.json")
+
+    # Update those urls which are scraped or not
+    updated_df = pd.read_csv(log_output)
+    final_outstanding_df = updated_df[updated_df['scraped'] == 0]
+    index = final_outstanding_df.index
+    number_of_rows = len(index)
+
+    with open(log_counter, 'r') as infile:
+        outstanding_items = json.load(infile)
+        outstanding_items['reviews'] = number_of_rows
+        with open(log_counter, 'w') as outfile:
+            json.dump(outstanding_items, outfile)
+    
+def update_outstanding_profiles(config):
+    basepath = os.path.dirname(__file__)
+    log_output = os.path.join(basepath,config['log_path'],'outstanding_profiles.csv')
+    log_counter = os.path.join(basepath,config['log_path'], "outstanding_items.json")
+
+    # Update those urls which are scraped or not
+    updated_df = pd.read_csv(log_output)
+    final_outstanding_df = updated_df[updated_df['scraped'] == 0]
+    index = final_outstanding_df.index
+    number_of_rows = len(index)
+
+    with open(log_counter, 'r') as infile:
+        outstanding_items = json.load(infile)
+        outstanding_items['profiles'] = number_of_rows
+        with open(log_counter, 'w') as outfile:
+            json.dump(outstanding_items, outfile)
+
+def update_outstanding_products(config):
+    basepath = os.path.dirname(__file__)
+    log_output = os.path.join(basepath,config['log_path'],'outstanding_products.csv')
+    log_counter = os.path.join(basepath,config['log_path'], "outstanding_items.json")
+
+    # Update those urls which are scraped or not
+    updated_df = pd.read_csv(log_output)
+    final_outstanding_df = updated_df[updated_df['scraped'] == 0]
+    index = final_outstanding_df.index
+    number_of_rows = len(index)
+
+    with open(log_counter, 'r') as infile:
+        outstanding_items = json.load(infile)
+        outstanding_items['products'] = number_of_rows
+        with open(log_counter, 'w') as outfile:
+            json.dump(outstanding_items, outfile)

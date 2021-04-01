@@ -27,6 +27,7 @@ Flask-SQLAlchemy==2.4.4
 google-api-core==1.25.1
 google-auth==1.25.0
 google-cloud-bigquery==2.7.0
+google_cloud_bigquery_storage==2.3.0
 google-cloud-core==1.5.0
 google-crc32c==1.1.2
 google-resumable-media==1.2.0

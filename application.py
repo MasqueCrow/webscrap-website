@@ -12,6 +12,7 @@ import threading
 from extensions import db
 from extensions import migrate
 from extensions import login_manager
+from google.cloud import bigquery
 
 from auth import auth as auth_blueprint
 from model import model as model_blueprint
@@ -41,8 +42,8 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = 'need to set os env variable for value'
     with app.app_context():
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
-        #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///mnt/c/users/ryan/work_ryan/y4s1/fyp/webscrap-website/loreal_db.sqlite3'
+        #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///mnt/c/users/ryan/work_ryan/y4s1/fyp/webscrap-website/loreal_db.sqlite3'
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         app.secret_key = os.urandom(24)
 
@@ -111,7 +112,6 @@ def check_non_empty_space_in_val(input):
 
 @celery.task()
 def query_reviews():
-    from google.cloud import bigquery
     from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
     from PIL import Image
     import matplotlib.pyplot as plt
@@ -162,6 +162,61 @@ def query_reviews():
     image_output_path = cwd +'/static/img/alice.jpg'
     wordcloud.to_file(image_output_path)
     print("Time taken to generate wordcloud:",time.time() - start)
+
+@celery.task()
+def query_reviews_contributors():
+    cwd = os.getcwd()
+    #change secret key path based on where you store it
+    secret_key_path = os.path.join(cwd,'credential_file.json')
+
+    #initialize bq client
+    client = bigquery.Client.from_service_account_json(secret_key_path)
+
+    query = '''
+        SELECT profile_name,count(*) as number_of_reviews FROM `crafty-chiller-276910.cleaned_items.reviews`
+        where profile_name != "Amazon Customer" AND profile_name != "Kindle Customer"
+        group by profile_name
+        order by number_of_reviews desc
+        Limit 10
+            '''
+    # get df with query result
+    df = client.query(query).to_dataframe()
+
+    #Write dataframe into JSON file
+    df.to_json("top_review_contributors.json", orient='records')
+    print("Successfully written 'top_review_contributors.json' file")
+
+@celery.task()
+def query_review_numbers():
+    cwd = os.getcwd()
+    #change secret key path based on where you store it
+    secret_key_path = os.path.join(cwd,'credential_file.json')
+
+    #initialize bq client
+    client = bigquery.Client.from_service_account_json(secret_key_path)
+    #open product mapping file
+    file_path = os.path.join(cwd,'product_mapping.json')
+
+    query = '''
+        SELECT ASIN,count(*) as number_of_reviews FROM `crafty-chiller-276910.cleaned_items.reviews`
+        group by ASIN
+        order by number_of_reviews desc
+        LIMIT 10
+            '''
+
+    # get df with query result
+    df = client.query(query).to_dataframe()
+
+    # replace ASIN with product names (for top few items)
+    with open(file_path, "r") as file:
+        mapping = json.load(file)
+        for value in df['ASIN']:
+            if value in mapping:
+                df['ASIN'] = df['ASIN'].replace([value],mapping[value])
+
+    #Write dataframe into JSON file
+    df.to_json("products_with_most_reviews.json", orient='records')
+    print("Successfully written 'products_with_most_reviews.json' file")
 
 
 @app.route('/dashboard')
@@ -268,6 +323,7 @@ def get_review_profile(config,com_review_output_path,com_review_con_path,com_pro
 
     m.get_reviews(config)
     m.get_outstanding_reviews(config)
+    m.update_outstanding_reviews(config)
     m.combine_reviews(com_review_output_path, com_review_con_path)
 
     #Update review status when crawling has been completed
@@ -282,6 +338,7 @@ def get_review_profile(config,com_review_output_path,com_review_con_path,com_pro
     # Scrape profiles
     m.get_profiles(config)
     m.get_outstanding_profiles(config)
+    m.update_outstanding_profiles(config)
     m.combine_profiles(com_profile_output_path, com_profile_con_path)
 
     #Update profile status when crawling has been completed
@@ -292,6 +349,7 @@ def get_product(config,com_product_output_path, com_product_con_path):
     clear_file('./crawl_progress/','product.txt')
     m.get_products(config)
     m.get_outstanding_products(config)
+    m.update_outstanding_products(config)
     m.combine_products(com_product_output_path, com_product_con_path)
 
     #Update product status when crawling has been completed
@@ -409,6 +467,10 @@ def webscrapestatus():
     }
 
     result = status_result()
+
+    query_reviews_contributors()
+    query_review_numbers()
+
 
     if len(result) == 3:
         complete_msg = "Web scraping has been completed."
