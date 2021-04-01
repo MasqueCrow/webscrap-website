@@ -117,7 +117,6 @@ def query_reviews():
     import matplotlib.pyplot as plt
     import numpy as np
 
-
     project = 'crafty-chiller-276910'
     cwd = os.getcwd()
     #change secret key path based on where you store it
@@ -164,11 +163,11 @@ def query_reviews():
     wordcloud.to_file(image_output_path)
     print("Time taken to generate wordcloud:",time.time() - start)
 
+
 @app.route('/dashboard')
 @login_required
 def index():
-    #create link to navigate back to  webscrape status
-    query_reviews.apply_async(queue='queue3')
+    #query_reviews.apply_async(queue='queue3')
 
     #Read time-series graph values
     f = open('webscrape_counter.json', 'r+')
@@ -179,7 +178,23 @@ def index():
 
     return render_template("dashboard.html",name=current_user.name,url ='/static/img/alice.jpg',webscrape_data=webscrape_data)
 
+@app.route('/dashboard_update',methods=['POST'])
+def dashboard_update():
+    update_status = request.form['update_status']
 
+    #Run celery task when update btn is triggered
+    if request.method == "POST":
+        query_reviews.apply_async(queue='queue3')
+
+    #Read time-series graph values
+    f = open('webscrape_counter.json', 'r+')
+    webscrape_data = json.load(f)
+
+    #stringify json value
+    webscrape_data = json.dumps(webscrape_data)
+    print(webscrape_data)
+
+    return render_template("dashboard.html",name=current_user.name,url ='/static/img/alice.jpg',webscrape_data=webscrape_data)
 @app.route('/webscrape')
 @login_required
 def webscrape():

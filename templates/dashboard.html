@@ -1,7 +1,25 @@
+<script src="https://code.jquery.com/jquery-3.5.1.js"   integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="   crossorigin="anonymous"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+  $("#updateBtn").click(function() {
+
+    $.ajax({
+      type : 'POST',
+      url : "{{url_for('dashboard_update')}}",
+      data : {'update_status':JSON.stringify('update')}, //data type has to be string
+      success:function(response){
+         console.log("success");
+       }
+    });
+
+  });
+
+});
+</script>
 <meta id="my-data" data-name="{{name}}" data-other="{{other}}">
 <style>
   .offset-md-5{
-    margin-left:86.3% !important;
+    margin-left:80% !important;
   }
   .offset-md-2{
     margin-left:19% !important;
@@ -24,7 +42,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="col-md-4 offset-md-5" style="margin-top:1.3%;margin-bottom:1%;">
+
+<div class="col-md-2 offset-md-5" style="margin-top:1.3%;margin-bottom:1%;">
+  <a id="updateBtn" type="button"  class="btn btn-info"  style="text-align:center;text-decoration:none;">Update</a>
   <a id="statusBtn" href="http://127.0.0.1:5000/webscrapestatus" type="button"  class="btn btn-info"  style="text-align:center;text-decoration:none;">Scrape Result</a>
 </div>
 
