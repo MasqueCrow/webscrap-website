@@ -9,6 +9,7 @@ var graphdic = JSON.parse(graphdic);
 var date = Object.keys(graphdic);
 var value = Object.values(graphdic);
 
+
 //Retrieve width and height of graph container
 let width =  myTS.offsetWidth;
 let height = myTS.offsetHeight;
@@ -30,6 +31,21 @@ var data = [
 }
 ];
 
+
+var minDate = date[0];
+var maxDate = date[date.length-1]
+
+//Add one day to min and max date
+var newMinDate =  new Date(minDate);
+newMinDate.setDate(newMinDate.getDate()+1);
+//to retrieve the new date use in string
+minDate = [newMinDate.getFullYear(),newMinDate.getMonth()+1,newMinDate.getDate()].join('-');
+
+var newMaxDate = new Date(maxDate);
+newMaxDate.setDate(newMaxDate.getDate()+1);
+//to retrieve the new date use in string
+maxDate = [newMaxDate.getFullYear(),newMaxDate.getMonth()+1,newMaxDate.getDate()].join('-');
+
 var layout = {
   title: {
     font:{
@@ -43,13 +59,13 @@ var layout = {
   height: height * 1.2 ,
 
   xaxis: {
-  range: ['2021-01-01', '2021-06-31'],
+  range: [, date[date.length-1]],
   type: 'date'
   },
 
   yaxis: {
   //autorange: true,
-  range: [value.min()-1, value.max()+1],
+  range: [minDate,maxDate],
   type: 'linear'
 }
 

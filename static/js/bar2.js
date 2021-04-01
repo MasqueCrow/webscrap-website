@@ -1,21 +1,33 @@
 //HorizontalBar
 var ctx3 = document.getElementById('barChart2').getContext('2d');
 
+var graphArr = document.getElementById('bar2Value').value;
+
+
+//converts string to object
+var graphArr = JSON.parse(graphArr);
+
+var graphdic = {};
+
+for(var i = 0; i <6;i++){
+
+  var asin = graphArr[i]["ASIN"];
+  var review = graphArr[i]["number_of_reviews"];
+  graphdic[asin] = review;
+}
+
+//Convert dic to key array and val array
+var asin = Object.keys(graphdic);
+var reviews = Object.values(graphdic);
+
  data3 = {
    datasets: [{
    backgroundColor: ["rgba(12, 99, 132, 0.35)","rgba(204, 255, 204, 0.35)","rgba(255, 204, 153, 0.35)","rgba(51, 51, 255, 0.35)","rgba(102, 102, 255, 0.35)"],
-   data:[10,15,18,20,30],
+   data:reviews,
    borderWidth: 3,
    minBarLength: 1,
  }],
- labels: [
-     'Product A',
-     'Product B',
-     'Product C',
-     'Product D',
-     'Product E'
- ]
-
+ labels: asin
  };
 
 var myBarChart = new Chart(ctx3, {
@@ -36,11 +48,9 @@ options: {
     scales: {
       xAxes: [{
         ticks: {
-          min: 0
         }
       }],
     }
-
     }
 
 });

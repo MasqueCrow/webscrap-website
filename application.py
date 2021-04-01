@@ -42,8 +42,8 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = 'need to set os env variable for value'
     with app.app_context():
-        #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///mnt/c/users/ryan/work_ryan/y4s1/fyp/webscrap-website/loreal_db.sqlite3'
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
+        #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///mnt/c/users/ryan/work_ryan/y4s1/fyp/webscrap-website/loreal_db.sqlite3'
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         app.secret_key = os.urandom(24)
 
@@ -120,7 +120,7 @@ def query_reviews():
     project = 'crafty-chiller-276910'
     cwd = os.getcwd()
     #change secret key path based on where you store it
-    secret_key_path = os.path.join(cwd,'..','fyp_secret_key.json')
+    secret_key_path = os.path.join(cwd,'credential_file.json')
 
     #initialize bq client
     client = bigquery.Client.from_service_account_json(secret_key_path)
@@ -183,7 +183,7 @@ def query_reviews_contributors():
     df = client.query(query).to_dataframe()
 
     #Write dataframe into JSON file
-    df.to_json("top_review_contributors.json", orient='records')
+    df.to_json("dashboard_data/top_review_contributors.json", orient='records')
     print("Successfully written 'top_review_contributors.json' file")
 
 @celery.task()
@@ -195,7 +195,7 @@ def query_review_numbers():
     #initialize bq client
     client = bigquery.Client.from_service_account_json(secret_key_path)
     #open product mapping file
-    file_path = os.path.join(cwd,'product_mapping.json')
+    file_path = os.path.join(cwd,'dashboard_data/product_mapping.json')
 
     query = '''
         SELECT ASIN,count(*) as number_of_reviews FROM `crafty-chiller-276910.cleaned_items.reviews`
@@ -207,31 +207,39 @@ def query_review_numbers():
     # get df with query result
     df = client.query(query).to_dataframe()
 
+    '''
     # replace ASIN with product names (for top few items)
     with open(file_path, "r") as file:
         mapping = json.load(file)
         for value in df['ASIN']:
             if value in mapping:
                 df['ASIN'] = df['ASIN'].replace([value],mapping[value])
+    '''
 
     #Write dataframe into JSON file
-    df.to_json("products_with_most_reviews.json", orient='records')
+    df.to_json("dashboard_data/products_with_most_reviews.json", orient='records')
     print("Successfully written 'products_with_most_reviews.json' file")
 
+def retrieve_data_from_json(filepath):
+    f = open(filepath, 'r+')
+    data = json.load(f)
+    data = json.dumps(data) #stringify json value
+    return data
 
 @app.route('/dashboard')
 @login_required
 def index():
-    #query_reviews.apply_async(queue='queue3')
 
-    #Read time-series graph values
-    f = open('webscrape_counter.json', 'r+')
-    webscrape_data = json.load(f)
+    webscrape_data = retrieve_data_from_json('dashboard_data/webscrape_counter.json')
+    review_contributors_data = retrieve_data_from_json('dashboard_data/top_review_contributors.json')
+    product_reviews_data = retrieve_data_from_json('dashboard_data/products_with_most_reviews.json')
+    outstanding_data = retrieve_data_from_json('amazonreviews/output/logs/outstanding_items.json')
 
-    #stringify json value
-    webscrape_data = json.dumps(webscrape_data)
-
-    return render_template("dashboard.html",name=current_user.name,url ='/static/img/alice.jpg',webscrape_data=webscrape_data)
+    return render_template("dashboard.html",name=current_user.name,url ='/static/img/alice.jpg',
+                           webscrape_data=webscrape_data,
+                           review_contributors_data=review_contributors_data,
+                           product_reviews_data=product_reviews_data,
+                           outstanding_data=outstanding_data)
 
 @app.route('/dashboard_update',methods=['POST'])
 def dashboard_update():
@@ -240,16 +248,20 @@ def dashboard_update():
     #Run celery task when update btn is triggered
     if request.method == "POST":
         query_reviews.apply_async(queue='queue3')
+        query_reviews_contributors.apply_async(queue='queue4')
+        query_review_numbers.apply_async(queue='queue5')
 
-    #Read time-series graph values
-    f = open('webscrape_counter.json', 'r+')
-    webscrape_data = json.load(f)
+    webscrape_data = retrieve_data_from_json('dashboard_data/webscrape_counter.json')
+    review_contributors_data = retrieve_data_from_json('dashboard_data/top_review_contributors.json')
+    product_reviews_data =  retrieve_data_from_json('dashboard_data/products_with_most_reviews.json')
+    outstanding_data = retrieve_data_from_json('amazonreviews/output/logs/outstanding_items.json')
 
-    #stringify json value
-    webscrape_data = json.dumps(webscrape_data)
-    print(webscrape_data)
+    return render_template("dashboard.html",name=current_user.name,url ='/static/img/alice.jpg',
+                           webscrape_data=webscrape_data,
+                           review_contributors_data=review_contributors_data,
+                           product_reviews_data=product_reviews_data,
+                           outstanding_data=outstanding_data)
 
-    return render_template("dashboard.html",name=current_user.name,url ='/static/img/alice.jpg',webscrape_data=webscrape_data)
 @app.route('/webscrape')
 @login_required
 def webscrape():
@@ -267,7 +279,7 @@ def update_counter_file():
     current_date = datetime.today().strftime('%Y-%m-%d')
 
     # load json counter file to read/write to
-    with open('webscrape_counter.json', 'r+') as infile:
+    with open('dashboard_data/webscrape_counter.json', 'r+') as infile:
         # load current file unless it is empty which causes the jsondecode error
         try:
             current_counts = json.load(infile)
@@ -281,7 +293,7 @@ def update_counter_file():
             print("JSON WEBSCRAPE COUNTER FILE NOT LOADED DUE TO VALUE ERROR")
             current_counts = {}
             current_counts[f'{current_date}'] = 1
-        with open('webscrape_counter.json', 'w') as outfile:
+        with open('dashboard_data/webscrape_counter.json', 'w') as outfile:
             # write updated count to counter file
             json.dump(current_counts, outfile)
             infile.close()
@@ -467,10 +479,6 @@ def webscrapestatus():
     }
 
     result = status_result()
-
-    query_reviews_contributors()
-    query_review_numbers()
-
 
     if len(result) == 3:
         complete_msg = "Web scraping has been completed."

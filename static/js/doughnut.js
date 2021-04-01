@@ -1,7 +1,15 @@
 var ctx = document.getElementById('doughChart').getContext('2d');
+var graphdic = document.getElementById('doughnutValue').value;
+
+//converts string to object
+var graphdic = JSON.parse(graphdic);
+
+var labels = Object.keys(graphdic);
+var values = Object.values(graphdic);
+
 data = {
     datasets: [{
-        data: [10, 20, 30,],
+        data: values,
         backgroundColor: [
         'rgba(255, 99, 132, 0.35)',
         'rgba(54, 162, 235, 0.35)',
@@ -15,11 +23,7 @@ data = {
     }],
 
     // These labels appear in the legend and in the tooltips when hovering different arcs
-    labels: [
-        'Red',
-        'Blue',
-        'Yellow'
-    ]
+    labels: labels
 };
 // And for a doughnut chart
 var myDoughnutChart = new Chart(ctx, {
@@ -42,7 +46,6 @@ var myDoughnutChart = new Chart(ctx, {
               fontStyle: 'normal',
               // font color, can be color array for each data or function for dynamic color, default is defaultFontColor
               fontFamily: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif",
-
             }
 
       ]
