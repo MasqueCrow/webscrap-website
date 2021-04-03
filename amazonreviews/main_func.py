@@ -162,7 +162,7 @@ def get_profiles(config):
               '-a config="{profiles_path},{log_file},{s_row},{e_row},main"' \
             .format(output_path=output_path, profiles_path=profiles_path, log_file=log_output, s_row=start_row, e_row=end_row, time=datetime.now().strftime("%H%M%S"))
         call(cmd, shell=True)
-        
+
 
 def get_products(config):
     """
@@ -316,16 +316,14 @@ def update_outstanding_reviews(config):
 
     # Update those urls which are scraped or not
     updated_df = pd.read_csv(log_output)
-    final_outstanding_df = updated_df[updated_df['scraped'] == 0]
-    index = final_outstanding_df.index
-    number_of_rows = len(index)
+    number_of_rows = len(updated_df.index)
 
     with open(log_counter, 'r') as infile:
         outstanding_items = json.load(infile)
         outstanding_items['reviews'] = number_of_rows
         with open(log_counter, 'w') as outfile:
             json.dump(outstanding_items, outfile)
-    
+
 def update_outstanding_profiles(config):
     basepath = os.path.dirname(__file__)
     log_output = os.path.join(basepath,config['log_path'],'outstanding_profiles.csv')
@@ -333,9 +331,7 @@ def update_outstanding_profiles(config):
 
     # Update those urls which are scraped or not
     updated_df = pd.read_csv(log_output)
-    final_outstanding_df = updated_df[updated_df['scraped'] == 0]
-    index = final_outstanding_df.index
-    number_of_rows = len(index)
+    number_of_rows = len(updated_df.index)
 
     with open(log_counter, 'r') as infile:
         outstanding_items = json.load(infile)
@@ -350,9 +346,7 @@ def update_outstanding_products(config):
 
     # Update those urls which are scraped or not
     updated_df = pd.read_csv(log_output)
-    final_outstanding_df = updated_df[updated_df['scraped'] == 0]
-    index = final_outstanding_df.index
-    number_of_rows = len(index)
+    number_of_rows = len(updated_df.index)
 
     with open(log_counter, 'r') as infile:
         outstanding_items = json.load(infile)
