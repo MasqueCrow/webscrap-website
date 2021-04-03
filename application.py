@@ -479,8 +479,10 @@ def webscrapestatus():
     }
 
     result = status_result()
+    print("result:",result)
 
-    if len(result) == 3:
+    #if 'product' and 'review' and 'profile' in result :
+    if 'product' and 'review' in result :
         complete_msg = "Web scraping has been completed."
         #invoke upload consolidated csvs and recreate output folder task after queue 1 and queue2
         cwd = os.getcwd()
