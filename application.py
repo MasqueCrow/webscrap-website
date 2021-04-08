@@ -42,8 +42,8 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = 'need to set os env variable for value'
     with app.app_context():
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
-        #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///mnt/c/users/ryan/work_ryan/y4s1/fyp/webscrap-website/loreal_db.sqlite3'
+        #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///mnt/c/users/ryan/work_ryan/y4s1/fyp/webscrap-website/loreal_db.sqlite3'
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         app.secret_key = os.urandom(24)
 
@@ -367,17 +367,10 @@ def get_product(config,com_product_output_path, com_product_con_path):
     #Update product status when crawling has been completed
     update_status('product')
 
-# @celery.task()
-# def upload_items_and_clean_output_folder(config):
-#     cwd = os.getcwd()
-#     #change secret key path based on where you store it
-#     secret_key_path = os.path.join(cwd,'credential_file.json')
-#     m.upload_consolidated_csvs(secret_key_path, 'crafty-chiller-276910', 'scraped_items_test', config)
-#     m.clear_output_folders(config)
-
 review_url_count = 0
 profile_url_count = 0
 product_url_count = 0
+data_not_uploaded = True
 ###################################################
 @app.route('/scrapeproduct',methods=['POST'])
 @login_required
@@ -464,6 +457,7 @@ def webscrapestatus():
     global review_url_count
     global profile_url_count
     global product_url_count
+    global data_not_uploaded
 
     review_url_count = sum(1 for line in open('./crawl_progress/review.txt'))
     profile_url_count = sum(1 for line in open('./crawl_progress/profile.txt'))
@@ -482,7 +476,7 @@ def webscrapestatus():
     print("result:",result)
 
     #if 'product' and 'review' and 'profile' in result :
-    if 'product' and 'review' in result :
+    if 'product' and 'review' in result and data_not_uploaded:
         complete_msg = "Web scraping has been completed."
         #invoke upload consolidated csvs and recreate output folder task after queue 1 and queue2
         cwd = os.getcwd()
@@ -490,6 +484,7 @@ def webscrapestatus():
         secret_key_path = os.path.join(cwd,'credential_file.json')
         m.upload_consolidated_csvs(secret_key_path, 'crafty-chiller-276910', 'scraped_items_test', config)
         m.clear_output_folders(config)
+        data_not_uploaded = False
 
     print("check status:",result)
 
