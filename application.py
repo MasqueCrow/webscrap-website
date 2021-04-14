@@ -42,8 +42,8 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = 'need to set os env variable for value'
     with app.app_context():
-        #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///mnt/c/users/ryan/work_ryan/y4s1/fyp/webscrap-website/loreal_db.sqlite3'
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///Users/jiaweitchea/desktop/fyp/webscrap/loreal_db.sqlite3'
+        #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://///mnt/c/users/ryan/work_ryan/y4s1/fyp/webscrap-website/loreal_db.sqlite3'
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         app.secret_key = os.urandom(24)
 
@@ -267,6 +267,7 @@ def dashboard_update():
 def webscrape():
     from model import Product
     products = Product.query.all()
+
     return render_template("webscrape.html",name=current_user.name,products=products)
 
 #Clear content of counter file at the beginning of running webscrape tool
@@ -453,16 +454,46 @@ def status_result():
 @app.route('/webscrapestatus',methods=['GET','POST'])
 @login_required
 def webscrapestatus():
+    #Product: no. of product scraped count by ASIN
+    #Profile: each url corresponds to one profile
+    #Review: no. of url scraped approx 10 reviews per page
+    def countScrapedProductReview(filepath):
+        scrapedList = []
+        a_file = open(filepath,'r')
+        for line in a_file:
+            scrapedList.append(line.strip())
+
+        #Get unique items
+        scrapedList = set(scrapedList)
+
+        scrapedCount = len(scrapedList)
+
+        return scrapedCount
+
+    def countScrapedProfile(filepath):
+            scrapedList = []
+            a_file = open(filepath,'r')
+
+            for line in a_file:
+                url_asin = line.strip().split("/")[-1].split("?")[0]
+                if "ref=cm_cr_dp_d_show_all_btm" not in url_asin:
+                    myList.append(url_asin)
+
+            #Get unique items
+            scrapedList = set(scrapedList)
+
+            scrapedCount = len(scrapedList)
+
+            return scrapedCount
 
     global review_url_count
     global profile_url_count
     global product_url_count
     global data_not_uploaded
 
-    review_url_count = sum(1 for line in open('./crawl_progress/review.txt'))
-    profile_url_count = sum(1 for line in open('./crawl_progress/profile.txt'))
-    product_url_count = sum(1 for line in open('./crawl_progress/product.txt'))
-
+    review_url_count = countScrapedProductReview('./crawl_progress/review.txt') * 10
+    profile_url_count = countScrapedProfile('./crawl_progress/profile.txt')
+    product_url_count = countScrapedProductReview('./crawl_progress/product.txt')
 
     msg = "Webscrape tool has been successfully activated. It might take a while before web crawling is completed. Please check back again later."
     complete_msg = ""
@@ -494,21 +525,38 @@ def webscrapestatus():
                            product_url_count=product_url_count,
                            msg=msg,complete_msg=complete_msg)
 
-#Retrieve last record in db and populate values in settings form
+
+@app.route('/directory')
+@login_required
+def directory():
+    #Retrieve last setting record
+    from model import Directory
+    obj = db.session.query(Directory).order_by(Directory.id.desc()).first()
+
+    input_path = obj.input_filepath
+    output_path = obj.output_filepath
+    tracker_path = obj.tracker_filepath
+    con_path = obj.consolidated_filepath
+    log_path = obj.log_filepath
+
+    return render_template(
+        "directory.html",name=current_user.name,
+        input_path = input_path,
+        output_path = output_path,
+        con_path = con_path,
+        log_path = log_path,
+        tracker_path = tracker_path)
+
+
 @app.route('/setting')
 @login_required
 def setting():
-    from model import Setting
-
     #Retrieve last setting record
+    from model import Setting
     obj = db.session.query(Setting).order_by(Setting.id.desc()).first()
-    input_path = obj.input_filepath
-    output_path = obj.output_filepath
+
     no_of_pg_crawl = obj.no_of_pg_crawl
     no_of_retry = obj.no_of_retry
-    con_path = obj.consolidated_filepath
-    log_path = obj.log_filepath
-    tracker_path = obj.tracker_filepath
 
     rotate_proxy = obj.rotate_proxy
     fetch_proxies = obj.fetch_proxies
@@ -519,13 +567,8 @@ def setting():
 
     return render_template(
             "setting.html",name=current_user.name,
-            input_path = input_path,
-            output_path = output_path,
             no_of_pg_crawl = no_of_pg_crawl,
             no_of_retry = no_of_retry,
-            con_path = con_path,
-            log_path = log_path,
-            tracker_path = tracker_path,
             rotate_proxy = rotate_proxy,
             fetch_proxies = fetch_proxies,
             rotating_proxy_page_retry = rotating_proxy_page_retry,
@@ -533,20 +576,46 @@ def setting():
             download_delay = download_delay,
             download_timeout = download_timeout
             )
+@app.route('/filescrapeconfig',methods=['POST'])
+@login_required
+def insert_directory_record():
+    from model import Directory
+
+    input_path = request.form.get('input_path')
+    output_path = request.form.get('output_path')
+    con_path = request.form.get('con_path')
+    log_path = request.form.get('log_path')
+    tracker_path = request.form.get('tracker_path')
+
+    #display result status of inserting new product into db
+    msg = ""
+
+    if (check_non_empty_space_in_val(input_path) and check_non_empty_space_in_val(output_path) and
+        check_non_empty_space_in_val(con_path) and check_non_empty_space_in_val(log_path) and
+        check_non_empty_space_in_val(tracker_path)):
+
+        new_directory = Directory(input_filepath = input_path,output_filepath = output_path,
+                                  consolidated_filepath = con_path,
+                                  log_filepath = log_path,tracker_filepath = tracker_path)
+
+        #add new record setting to database
+        db.session.add(new_directory)
+        db.session.commit()
+
+        msg = "File directories have been successfully modified in the database."
+
+    else:
+        msg = "Failed to change file directories into database."
+
+    return render_template('directory_status.html',msg=msg,name=current_user.name)
 
 @app.route('/webscrapeconfig',methods=['POST'])
 @login_required
 def insert_setting_record():
     from model import Setting
 
-    input_path = request.form.get('input_path')
-    output_path = request.form.get('output_path')
     no_of_pg_crawl = int(request.form.get('no_of_pg_crawl'))
     no_of_retry = int(request.form.get('no_of_retry'))
-    con_path = request.form.get('con_path')
-    log_path = request.form.get('log_path')
-    tracker_path = request.form.get('tracker_path')
-
     rotate_proxy = bool(request.form.get('rotate_proxy'))
     fetch_proxies = int(request.form.get('fetch_proxies'))
     rotating_proxy_page_retry = int(request.form.get('rotating_proxy_page_retry'))
@@ -559,15 +628,11 @@ def insert_setting_record():
 
     #Validate inputs are string and integers before inserting records
     if (isinstance(no_of_pg_crawl,int) and isinstance(no_of_retry,int) and
-    check_non_empty_space_in_val(input_path) and check_non_empty_space_in_val(output_path) and
-    check_non_empty_space_in_val(con_path) and check_non_empty_space_in_val(log_path) and
-    check_non_empty_space_in_val(tracker_path) and
     isinstance(fetch_proxies,int) and isinstance(rotating_proxy_page_retry,int) and
     isinstance(no_of_concurrent_request,int) and isinstance(download_delay,int) and
     isinstance(download_timeout,int)):
 
-        new_setting = Setting(input_filepath = input_path,output_filepath = output_path,consolidated_filepath = con_path,
-                              log_filepath = log_path,tracker_filepath = tracker_path,no_of_pg_crawl = no_of_pg_crawl,no_of_retry = no_of_retry,
+        new_setting = Setting(no_of_pg_crawl = no_of_pg_crawl,no_of_retry = no_of_retry,
                               rotate_proxy = rotate_proxy, fetch_proxies = fetch_proxies,
                               rotating_proxy_page_retry = rotating_proxy_page_retry,no_of_concurrent_request = no_of_concurrent_request,
                               download_delay = download_delay, download_timeout = download_timeout)
