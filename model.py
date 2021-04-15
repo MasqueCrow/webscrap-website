@@ -21,17 +21,19 @@ class User(UserMixin,db.Model):
 
 class Setting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    input_filepath = db.Column(db.String)
-    output_filepath = db.Column(db.String)
-    consolidated_filepath = db.Column(db.String)
-    log_filepath = db.Column(db.String)
-    tracker_filepath = db.Column(db.String)
-    no_of_pg_crawl = db.Column(db.Integer)
-    no_of_retry = db.Column(db.Integer)
-
     rotate_proxy = db.Column(db.Boolean)
     fetch_proxies = db.Column(db.Integer)
     rotating_proxy_page_retry = db.Column(db.Integer)
     no_of_concurrent_request = db.Column(db.Integer)
     download_delay = db.Column(db.Integer)
     download_timeout = db.Column(db.Integer)
+    no_of_pg_crawl = db.Column(db.Integer)
+    no_of_retry = db.Column(db.Integer)
+
+class Directory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    input_filepath = db.Column(db.String)
+    output_filepath = db.Column(db.String)
+    consolidated_filepath = db.Column(db.String)
+    log_filepath = db.Column(db.String)
+    tracker_filepath = db.Column(db.String)
