@@ -8,7 +8,7 @@ var graphArr = JSON.parse(graphArr);
 
 var graphdic = {};
 
-for(var i = 0; i <6;i++){
+for(var i = 0; i <5;i++){
 
   var user = graphArr[i]["profile_name"];
   var review = graphArr[i]["number_of_reviews"];
@@ -46,7 +46,7 @@ options: {
     responsive: false,
     scales: {
       xAxes: [{
-        ticks: {          
+        ticks: {
         }
       }],
     }

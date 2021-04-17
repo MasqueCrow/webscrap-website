@@ -69,16 +69,19 @@ def __init__(self,name,price,last_scraped):
 def configure_setting(app):
     with app.app_context():
         from model import Setting
-        obj = db.session.query(Setting).order_by(Setting.id.desc()).first()
+        from model import Directory
 
-        rotate_proxy = obj.rotate_proxy
-        fetch_proxies = obj.fetch_proxies
-        rotating_proxy_page_retry = obj.rotating_proxy_page_retry
-        no_of_concurrent_request = obj.no_of_concurrent_request
-        download_delay = obj.download_delay
-        download_timeout = obj.download_timeout
-        no_of_retry = obj.no_of_retry
-        tracker_output = obj.tracker_filepath
+        set_obj = db.session.query(Setting).order_by(Setting.id.desc()).first()
+        dir_obj = db.session.query(Directory).order_by(Directory.id.desc()).first()
+
+        rotate_proxy = set_obj.rotate_proxy
+        fetch_proxies = set_obj.fetch_proxies
+        rotating_proxy_page_retry = set_obj.rotating_proxy_page_retry
+        no_of_concurrent_request = set_obj.no_of_concurrent_request
+        download_delay = set_obj.download_delay
+        download_timeout = set_obj.download_timeout
+        no_of_retry = set_obj.no_of_retry
+        tracker_output = dir_obj.tracker_filepath
 
         configure_setting = {
         'RETRY_TIMES': no_of_retry,
@@ -235,11 +238,25 @@ def index():
     product_reviews_data = retrieve_data_from_json('dashboard_data/products_with_most_reviews.json')
     outstanding_data = retrieve_data_from_json('amazonreviews/output/logs/outstanding_items.json')
 
+    #pass product_mapping json value without stringify
+    f = open('dashboard_data/product_mapping.json', 'r+')
+    product_mapping = json.load(f)
+
+    #remove product descriptiona and store product names
+    i = 0
+    new_product_mapping = {}
+    for key,value in product_mapping.items():
+        new_product_mapping[key] = value.split(",")[0]
+        if i == 4:
+            break
+        i+=1
+
     return render_template("dashboard.html",name=current_user.name,url ='/static/img/alice.jpg',
                            webscrape_data=webscrape_data,
                            review_contributors_data=review_contributors_data,
                            product_reviews_data=product_reviews_data,
-                           outstanding_data=outstanding_data)
+                           outstanding_data=outstanding_data,
+                           product_mapping = new_product_mapping)
 
 @app.route('/dashboard_update',methods=['POST'])
 def dashboard_update():
@@ -378,15 +395,19 @@ data_not_uploaded = True
 def scrape_product():
 
     from model import Setting
+    from model import Directory
 
     #Retrieve last record in setting model
-    obj = db.session.query(Setting).order_by(Setting.id.desc()).first()
-    input_path = obj.input_filepath
-    output_path = obj.output_filepath
-    no_of_pg_crawl = obj.no_of_pg_crawl
-    no_of_retry = obj.no_of_retry
-    con_path = obj.consolidated_filepath
-    log_path = obj.log_filepath
+    set_obj = db.session.query(Setting).order_by(Setting.id.desc()).first()
+    dir_obj = db.session.query(Directory).order_by(Directory.id.desc()).first()
+
+    input_path = dir_obj.input_filepath
+    output_path = dir_obj.output_filepath
+    con_path = dir_obj.consolidated_filepath
+    log_path = dir_obj.log_filepath
+    no_of_pg_crawl = set_obj.no_of_pg_crawl
+    no_of_retry = set_obj.no_of_retry
+
 
     config = {
         'input_path': input_path,
@@ -473,7 +494,7 @@ def webscrapestatus():
     def countScrapedProfile(filepath):
             scrapedList = []
             a_file = open(filepath,'r')
-
+            myList = []
             for line in a_file:
                 url_asin = line.strip().split("/")[-1].split("?")[0]
                 if "ref=cm_cr_dp_d_show_all_btm" not in url_asin:
@@ -507,15 +528,17 @@ def webscrapestatus():
     print("result:",result)
 
     #if 'product' and 'review' and 'profile' in result :
-    if 'product' and 'review' in result and data_not_uploaded:
+    if 'product' and 'review' in result:
         complete_msg = "Web scraping has been completed."
-        #invoke upload consolidated csvs and recreate output folder task after queue 1 and queue2
-        cwd = os.getcwd()
-        #change secret key path based on where you store it
-        secret_key_path = os.path.join(cwd,'credential_file.json')
-        m.upload_consolidated_csvs(secret_key_path, 'crafty-chiller-276910', 'scraped_items_test', config)
-        m.clear_output_folders(config)
-        data_not_uploaded = False
+            
+        if data_not_uploaded:
+            #invoke upload consolidated csvs and recreate output folder task after queue 1 and queue2
+            cwd = os.getcwd()
+            #change secret key path based on where you store it
+            secret_key_path = os.path.join(cwd,'credential_file.json')
+            m.upload_consolidated_csvs(secret_key_path, 'crafty-chiller-276910', 'scraped_items_test', config)
+            m.clear_output_folders(config)
+            data_not_uploaded = False
 
     print("check status:",result)
 

@@ -31,7 +31,8 @@
     width:33% !important;
   }
   .col-md-x{
-    width:41.5% !important;
+  width:41.5% !important;
+  height:652px;
   }
   .card-title{
     color:#6c757d;
@@ -68,8 +69,18 @@
 
 <div class="shadow card col-md-x offset-md-1" style="margin-top:1%;margin-bottom:1%;padding-left:0px;padding-right:0px;">
   <h5 class="card-header card-title">Review Overview</h5>
-  <canvas id="barChart"style="height:33%;"></canvas>
-  <canvas id="barChart2"style="height:33%;margin-top:3%;"></canvas>
+  <canvas id="barChart"style="height:42%;"></canvas>
+  <canvas id="barChart2"style="height:42%;margin-top:3%;"></canvas>
+</div>
+
+<div class="shadow card col-md-7" style="margin-top:1%;margin-left:29.5%;margin-bottom:1%;padding-left:0px;padding-right:0px;">
+  <h5 class="card-header card-title">Product Asin and Name Mapping</h5>
+  <p style="margin-top:1%;font-size:17px;margin-left:4%;">
+  {% for key in product_mapping %}
+  <b>{{key}}</b>: {{product_mapping[key]}}
+  <br/><br/>
+  {% endfor %}
+  </p>
 </div>
 
 <input id="graphValue" type="hidden" value="{{webscrape_data}}">
